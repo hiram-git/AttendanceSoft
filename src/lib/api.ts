@@ -139,6 +139,8 @@ export const api = {
   },
   portalBook: (b: { serviceId: string; staffId: string; date: string; startTime: string }) =>
     http<Appointment>('/api/portal/appointments', json('POST', b)),
+  portalCancel: (id: string) =>
+    http<Appointment>(`/api/portal/appointments/${id}/cancel`, { method: 'PATCH' }),
 
   // Invitations (staff side)
   createClientInvitation: (clientId: string) =>

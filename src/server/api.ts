@@ -340,6 +340,38 @@ export const api = new Elysia()
           },
         )
 
+        // Client cancels one of their own appointments. We don't expose
+        // a generic PATCH because we don't want clients editing dates
+        // or labels — they cancel and re-book instead.
+        .patch(
+          '/api/portal/appointments/:id/cancel',
+          async ({ params, session, set }) => {
+            const clientId = session?.user.clientId
+            if (!clientId) {
+              set.status = 400
+              return { error: 'no_client' }
+            }
+            const rows = await db
+              .select()
+              .from(appointments)
+              .where(eq(appointments.id, params.id))
+            if (rows.length === 0) {
+              set.status = 404
+              return { error: 'not_found' }
+            }
+            if (rows[0].clientId !== clientId) {
+              set.status = 403
+              return { error: 'not_yours' }
+            }
+            const [row] = await db
+              .update(appointments)
+              .set({ status: 'cancelada' })
+              .where(eq(appointments.id, params.id))
+              .returning()
+            return row
+          },
+        )
+
         // Client books a slot. Server expands the service into kind +
         // duration + label and runs the same conflict guard the
         // backoffice POST /api/appointments uses.

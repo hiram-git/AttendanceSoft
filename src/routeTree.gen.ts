@@ -19,13 +19,17 @@ import { Route as BackofficeRouteImport } from './routes/backoffice'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as BackofficeIndexRouteImport } from './routes/backoffice.index'
+import { Route as PortalSignupRouteImport } from './routes/portal.signup'
+import { Route as PortalProfileRouteImport } from './routes/portal.profile'
 import { Route as PortalBookRouteImport } from './routes/portal.book'
+import { Route as PortalAppointmentsRouteImport } from './routes/portal.appointments'
 import { Route as BackofficeStaffRouteImport } from './routes/backoffice.staff'
 import { Route as BackofficeSettingsRouteImport } from './routes/backoffice.settings'
 import { Route as BackofficeServicesRouteImport } from './routes/backoffice.services'
 import { Route as BackofficeReportsRouteImport } from './routes/backoffice.reports'
 import { Route as BackofficeClientsRouteImport } from './routes/backoffice.clients'
 import { Route as BackofficeAppointmentsRouteImport } from './routes/backoffice.appointments'
+import { Route as PortalInviteTokenRouteImport } from './routes/portal.invite.$token'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -77,9 +81,24 @@ const BackofficeIndexRoute = BackofficeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => BackofficeRoute,
 } as any)
+const PortalSignupRoute = PortalSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalProfileRoute = PortalProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PortalRoute,
+} as any)
 const PortalBookRoute = PortalBookRouteImport.update({
   id: '/book',
   path: '/book',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalAppointmentsRoute = PortalAppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
   getParentRoute: () => PortalRoute,
 } as any)
 const BackofficeStaffRoute = BackofficeStaffRouteImport.update({
@@ -112,6 +131,11 @@ const BackofficeAppointmentsRoute = BackofficeAppointmentsRouteImport.update({
   path: '/appointments',
   getParentRoute: () => BackofficeRoute,
 } as any)
+const PortalInviteTokenRoute = PortalInviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => PortalRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -128,9 +152,13 @@ export interface FileRoutesByFullPath {
   '/backoffice/services': typeof BackofficeServicesRoute
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
+  '/portal/appointments': typeof PortalAppointmentsRoute
   '/portal/book': typeof PortalBookRoute
+  '/portal/profile': typeof PortalProfileRoute
+  '/portal/signup': typeof PortalSignupRoute
   '/backoffice/': typeof BackofficeIndexRoute
   '/portal/': typeof PortalIndexRoute
+  '/portal/invite/$token': typeof PortalInviteTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -145,9 +173,13 @@ export interface FileRoutesByTo {
   '/backoffice/services': typeof BackofficeServicesRoute
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
+  '/portal/appointments': typeof PortalAppointmentsRoute
   '/portal/book': typeof PortalBookRoute
+  '/portal/profile': typeof PortalProfileRoute
+  '/portal/signup': typeof PortalSignupRoute
   '/backoffice': typeof BackofficeIndexRoute
   '/portal': typeof PortalIndexRoute
+  '/portal/invite/$token': typeof PortalInviteTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -165,9 +197,13 @@ export interface FileRoutesById {
   '/backoffice/services': typeof BackofficeServicesRoute
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
+  '/portal/appointments': typeof PortalAppointmentsRoute
   '/portal/book': typeof PortalBookRoute
+  '/portal/profile': typeof PortalProfileRoute
+  '/portal/signup': typeof PortalSignupRoute
   '/backoffice/': typeof BackofficeIndexRoute
   '/portal/': typeof PortalIndexRoute
+  '/portal/invite/$token': typeof PortalInviteTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -186,9 +222,13 @@ export interface FileRouteTypes {
     | '/backoffice/services'
     | '/backoffice/settings'
     | '/backoffice/staff'
+    | '/portal/appointments'
     | '/portal/book'
+    | '/portal/profile'
+    | '/portal/signup'
     | '/backoffice/'
     | '/portal/'
+    | '/portal/invite/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -203,9 +243,13 @@ export interface FileRouteTypes {
     | '/backoffice/services'
     | '/backoffice/settings'
     | '/backoffice/staff'
+    | '/portal/appointments'
     | '/portal/book'
+    | '/portal/profile'
+    | '/portal/signup'
     | '/backoffice'
     | '/portal'
+    | '/portal/invite/$token'
   id:
     | '__root__'
     | '/'
@@ -222,9 +266,13 @@ export interface FileRouteTypes {
     | '/backoffice/services'
     | '/backoffice/settings'
     | '/backoffice/staff'
+    | '/portal/appointments'
     | '/portal/book'
+    | '/portal/profile'
+    | '/portal/signup'
     | '/backoffice/'
     | '/portal/'
+    | '/portal/invite/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -310,11 +358,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackofficeIndexRouteImport
       parentRoute: typeof BackofficeRoute
     }
+    '/portal/signup': {
+      id: '/portal/signup'
+      path: '/signup'
+      fullPath: '/portal/signup'
+      preLoaderRoute: typeof PortalSignupRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/profile': {
+      id: '/portal/profile'
+      path: '/profile'
+      fullPath: '/portal/profile'
+      preLoaderRoute: typeof PortalProfileRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/portal/book': {
       id: '/portal/book'
       path: '/book'
       fullPath: '/portal/book'
       preLoaderRoute: typeof PortalBookRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/appointments': {
+      id: '/portal/appointments'
+      path: '/appointments'
+      fullPath: '/portal/appointments'
+      preLoaderRoute: typeof PortalAppointmentsRouteImport
       parentRoute: typeof PortalRoute
     }
     '/backoffice/staff': {
@@ -359,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackofficeAppointmentsRouteImport
       parentRoute: typeof BackofficeRoute
     }
+    '/portal/invite/$token': {
+      id: '/portal/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/portal/invite/$token'
+      preLoaderRoute: typeof PortalInviteTokenRouteImport
+      parentRoute: typeof PortalRoute
+    }
   }
 }
 
@@ -387,13 +463,21 @@ const BackofficeRouteWithChildren = BackofficeRoute._addFileChildren(
 )
 
 interface PortalRouteChildren {
+  PortalAppointmentsRoute: typeof PortalAppointmentsRoute
   PortalBookRoute: typeof PortalBookRoute
+  PortalProfileRoute: typeof PortalProfileRoute
+  PortalSignupRoute: typeof PortalSignupRoute
   PortalIndexRoute: typeof PortalIndexRoute
+  PortalInviteTokenRoute: typeof PortalInviteTokenRoute
 }
 
 const PortalRouteChildren: PortalRouteChildren = {
+  PortalAppointmentsRoute: PortalAppointmentsRoute,
   PortalBookRoute: PortalBookRoute,
+  PortalProfileRoute: PortalProfileRoute,
+  PortalSignupRoute: PortalSignupRoute,
   PortalIndexRoute: PortalIndexRoute,
+  PortalInviteTokenRoute: PortalInviteTokenRoute,
 }
 
 const PortalRouteWithChildren =

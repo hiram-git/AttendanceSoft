@@ -4,41 +4,38 @@ import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { useTheme } from '../lib/useTheme.ts'
 import { NavIcon } from '../components/icons.tsx'
-import { signIn } from '../lib/auth-client.ts'
+import { api, ApiError } from '../lib/api.ts'
 
-export const Route = createFileRoute('/login')({ component: LoginPage })
+export const Route = createFileRoute('/portal/signup')({ component: PortalSignupPage })
 
-const credentialsSchema = z.object({
+const schema = z.object({
+  name: z.string().min(2, 'Mínimo 2 caracteres'),
   email: z.string().email('Correo inválido'),
-  password: z.string().min(6, 'Mínimo 6 caracteres'),
-  remember: z.boolean(),
+  phone: z.string().optional(),
+  password: z.string().min(8, 'Mínimo 8 caracteres'),
 })
 
-function LoginPage() {
+function PortalSignupPage() {
   const { appDark, toggleApp } = useTheme()
   const navigate = useNavigate()
-  const [authError, setAuthError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const form = useForm({
-    defaultValues: {
-      email: 'camila@vertice.mx',
-      password: 'attendancesoft',
-      remember: true,
-    },
-    validators: { onSubmit: credentialsSchema },
+    defaultValues: { name: '', email: '', phone: '', password: '' },
+    validators: { onSubmit: schema },
     onSubmit: async ({ value }) => {
-      setAuthError(null)
-      const res = await signIn.email({
-        email: value.email,
-        password: value.password,
-        rememberMe: value.remember,
-      })
-      if (res.error) {
-        setAuthError(res.error.message ?? 'No pudimos iniciar sesión.')
-        return
+      setError(null)
+      try {
+        await api.portalSignup({
+          name: value.name,
+          email: value.email,
+          password: value.password,
+          phone: value.phone || undefined,
+        })
+        navigate({ to: '/portal' })
+      } catch (e) {
+        setError(e instanceof ApiError ? e.message : 'No pudimos crear tu cuenta')
       }
-      const role = (res.data.user as { role?: string }).role
-      await navigate({ to: role === 'client' ? '/portal' : '/dashboard' })
     },
   })
 
@@ -47,22 +44,21 @@ function LoginPage() {
       <aside className="login-aside">
         <div className="login-brand">Attendance<span className="dot">·</span>Soft</div>
         <div className="login-pitch">
-          <h1>La operación, sin fricción.</h1>
+          <h1>Tu agenda, sin teléfono ni filas.</h1>
           <p>
-            Reservas, recursos y disponibilidad en una sola plataforma. Diseñada para
-            equipos que necesitan claridad en cada turno.
+            Crea tu cuenta en menos de un minuto. Después podrás reservar,
+            consultar y cancelar citas desde cualquier dispositivo.
           </p>
         </div>
         <div className="login-quote">
-          “La diferencia entre una agenda saturada y una agenda controlada se mide en
-          minutos al día.”
+          “La mejor reserva es la que no tienes que recordar — el sistema lo hace por ti.”
           <div className="login-quote-attr">Equipo de producto · AttendanceSoft</div>
         </div>
       </aside>
 
       <main className="login-main">
         <div className="login-topbar">
-          <span>¿No tienes cuenta? <Link to="/portal/signup">Crear una</Link></span>
+          <span>¿Ya tienes cuenta? <Link to="/login">Iniciar sesión</Link></span>
           <button className="theme-pill" onClick={toggleApp}>
             {appDark ? NavIcon.sun : NavIcon.moon}
             {appDark ? 'Oscuro' : 'Claro'}
@@ -78,22 +74,31 @@ function LoginPage() {
           }}
         >
           <div>
-            <h2 className="login-title">Iniciar sesión</h2>
-            <p className="login-sub">Bienvenido de vuelta. Continúa donde lo dejaste.</p>
+            <h2 className="login-title">Crear cuenta</h2>
+            <p className="login-sub">Como cliente, podrás reservar y gestionar tus citas en el portal.</p>
           </div>
 
-          <div className="login-sso">
-            <button type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z" /></svg>
-              Continuar con SSO
-            </button>
-            <button type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1H12v3.2h5.35c-.5 2.4-2.55 3.7-5.35 3.7a5.9 5.9 0 0 1 0-11.8c1.4 0 2.7.5 3.7 1.4l2.4-2.4A9.3 9.3 0 0 0 12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4 9.6-9.7 0-.4 0-.8-.25-1.2z" /></svg>
-              Continuar con Google
-            </button>
-          </div>
-
-          <div className="login-divider">o con tu correo</div>
+          <form.Field name="name">
+            {(field) => (
+              <div className="field">
+                <label className="field-label" htmlFor={field.name}>Nombre completo</label>
+                <input
+                  id={field.name}
+                  className="input focus-ring"
+                  type="text"
+                  placeholder="Ej. Camila Reyes"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                />
+                {field.state.meta.errors.length > 0 && (
+                  <span style={{ fontSize: 12, color: 'var(--danger)' }}>
+                    {String(field.state.meta.errors[0]?.message ?? field.state.meta.errors[0])}
+                  </span>
+                )}
+              </div>
+            )}
+          </form.Field>
 
           <form.Field name="email">
             {(field) => (
@@ -101,10 +106,9 @@ function LoginPage() {
                 <label className="field-label" htmlFor={field.name}>Correo electrónico</label>
                 <input
                   id={field.name}
-                  name={field.name}
                   className="input focus-ring"
                   type="email"
-                  placeholder="tu@empresa.com"
+                  placeholder="tu@ejemplo.com"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
@@ -114,6 +118,22 @@ function LoginPage() {
                     {String(field.state.meta.errors[0]?.message ?? field.state.meta.errors[0])}
                   </span>
                 )}
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="phone">
+            {(field) => (
+              <div className="field">
+                <label className="field-label" htmlFor={field.name}>Teléfono (opcional)</label>
+                <input
+                  id={field.name}
+                  className="input focus-ring"
+                  type="tel"
+                  placeholder="+52 ..."
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
               </div>
             )}
           </form.Field>
@@ -121,15 +141,12 @@ function LoginPage() {
           <form.Field name="password">
             {(field) => (
               <div className="field">
-                <label className="field-label" htmlFor={field.name}>
-                  Contraseña <Link to="/forgot-password">¿La olvidaste?</Link>
-                </label>
+                <label className="field-label" htmlFor={field.name}>Contraseña</label>
                 <input
                   id={field.name}
-                  name={field.name}
                   className="input focus-ring"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Mínimo 8 caracteres"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
@@ -143,23 +160,7 @@ function LoginPage() {
             )}
           </form.Field>
 
-          <form.Field name="remember">
-            {(field) => (
-              <div className="login-meta">
-                <label className="checkbox">
-                  <input
-                    type="checkbox"
-                    checked={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.checked)}
-                  />
-                  <span className="box">{NavIcon.check}</span>
-                  Mantener sesión iniciada
-                </label>
-              </div>
-            )}
-          </form.Field>
-
-          {authError && (
+          {error && (
             <div
               role="alert"
               style={{
@@ -171,14 +172,14 @@ function LoginPage() {
                 borderRadius: 'var(--radius-2)',
               }}
             >
-              {authError}
+              {error}
             </div>
           )}
 
           <form.Subscribe selector={(s) => s.isSubmitting}>
-            {(isSubmitting) => (
-              <button type="submit" className="btn-primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Entrando…' : 'Entrar al panel'}
+            {(s) => (
+              <button type="submit" className="btn-primary" disabled={s}>
+                {s ? 'Creando cuenta…' : 'Crear cuenta y entrar'}
               </button>
             )}
           </form.Subscribe>
@@ -189,7 +190,6 @@ function LoginPage() {
           <div className="login-footer-links">
             <a href="#">Privacidad</a>
             <a href="#">Términos</a>
-            <a href="#">Estado</a>
           </div>
           <div>
             <Link to="/" style={{ textDecoration: 'none' }}>← Volver al inicio</Link>
