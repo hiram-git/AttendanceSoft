@@ -16,7 +16,9 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BackofficeRouteImport } from './routes/backoffice'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BackofficeStaffRouteImport } from './routes/backoffice.staff'
+import { Route as BackofficeSettingsRouteImport } from './routes/backoffice.settings'
 import { Route as BackofficeServicesRouteImport } from './routes/backoffice.services'
+import { Route as BackofficeReportsRouteImport } from './routes/backoffice.reports'
 import { Route as BackofficeClientsRouteImport } from './routes/backoffice.clients'
 import { Route as BackofficeAppointmentsRouteImport } from './routes/backoffice.appointments'
 
@@ -55,9 +57,19 @@ const BackofficeStaffRoute = BackofficeStaffRouteImport.update({
   path: '/staff',
   getParentRoute: () => BackofficeRoute,
 } as any)
+const BackofficeSettingsRoute = BackofficeSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => BackofficeRoute,
+} as any)
 const BackofficeServicesRoute = BackofficeServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => BackofficeRoute,
+} as any)
+const BackofficeReportsRoute = BackofficeReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => BackofficeRoute,
 } as any)
 const BackofficeClientsRoute = BackofficeClientsRouteImport.update({
@@ -80,7 +92,9 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
   '/backoffice/clients': typeof BackofficeClientsRoute
+  '/backoffice/reports': typeof BackofficeReportsRoute
   '/backoffice/services': typeof BackofficeServicesRoute
+  '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
 }
 export interface FileRoutesByTo {
@@ -92,7 +106,9 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
   '/backoffice/clients': typeof BackofficeClientsRoute
+  '/backoffice/reports': typeof BackofficeReportsRoute
   '/backoffice/services': typeof BackofficeServicesRoute
+  '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
 }
 export interface FileRoutesById {
@@ -105,7 +121,9 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
   '/backoffice/clients': typeof BackofficeClientsRoute
+  '/backoffice/reports': typeof BackofficeReportsRoute
   '/backoffice/services': typeof BackofficeServicesRoute
+  '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
 }
 export interface FileRouteTypes {
@@ -119,7 +137,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/backoffice/appointments'
     | '/backoffice/clients'
+    | '/backoffice/reports'
     | '/backoffice/services'
+    | '/backoffice/settings'
     | '/backoffice/staff'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -131,7 +151,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/backoffice/appointments'
     | '/backoffice/clients'
+    | '/backoffice/reports'
     | '/backoffice/services'
+    | '/backoffice/settings'
     | '/backoffice/staff'
   id:
     | '__root__'
@@ -143,7 +165,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/backoffice/appointments'
     | '/backoffice/clients'
+    | '/backoffice/reports'
     | '/backoffice/services'
+    | '/backoffice/settings'
     | '/backoffice/staff'
   fileRoutesById: FileRoutesById
 }
@@ -207,11 +231,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackofficeStaffRouteImport
       parentRoute: typeof BackofficeRoute
     }
+    '/backoffice/settings': {
+      id: '/backoffice/settings'
+      path: '/settings'
+      fullPath: '/backoffice/settings'
+      preLoaderRoute: typeof BackofficeSettingsRouteImport
+      parentRoute: typeof BackofficeRoute
+    }
     '/backoffice/services': {
       id: '/backoffice/services'
       path: '/services'
       fullPath: '/backoffice/services'
       preLoaderRoute: typeof BackofficeServicesRouteImport
+      parentRoute: typeof BackofficeRoute
+    }
+    '/backoffice/reports': {
+      id: '/backoffice/reports'
+      path: '/reports'
+      fullPath: '/backoffice/reports'
+      preLoaderRoute: typeof BackofficeReportsRouteImport
       parentRoute: typeof BackofficeRoute
     }
     '/backoffice/clients': {
@@ -234,14 +272,18 @@ declare module '@tanstack/react-router' {
 interface BackofficeRouteChildren {
   BackofficeAppointmentsRoute: typeof BackofficeAppointmentsRoute
   BackofficeClientsRoute: typeof BackofficeClientsRoute
+  BackofficeReportsRoute: typeof BackofficeReportsRoute
   BackofficeServicesRoute: typeof BackofficeServicesRoute
+  BackofficeSettingsRoute: typeof BackofficeSettingsRoute
   BackofficeStaffRoute: typeof BackofficeStaffRoute
 }
 
 const BackofficeRouteChildren: BackofficeRouteChildren = {
   BackofficeAppointmentsRoute: BackofficeAppointmentsRoute,
   BackofficeClientsRoute: BackofficeClientsRoute,
+  BackofficeReportsRoute: BackofficeReportsRoute,
   BackofficeServicesRoute: BackofficeServicesRoute,
+  BackofficeSettingsRoute: BackofficeSettingsRoute,
   BackofficeStaffRoute: BackofficeStaffRoute,
 }
 

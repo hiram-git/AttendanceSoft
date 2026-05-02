@@ -16,8 +16,9 @@ const SECTIONS = [
     label: 'Backoffice',
     items: [
       { id: 'staff', label: 'Equipo y disponibilidad', icon: NavIcon.staff, to: '/backoffice' },
-      { id: 'rep', label: 'Reportes', icon: NavIcon.rep, to: '/backoffice' },
-      { id: 'set', label: 'Ajustes', icon: NavIcon.set, to: '/backoffice' },
+      { id: 'team', label: 'Personal', icon: NavIcon.staff, to: '/backoffice/staff' },
+      { id: 'rep', label: 'Reportes', icon: NavIcon.rep, to: '/backoffice/reports' },
+      { id: 'set', label: 'Ajustes', icon: NavIcon.set, to: '/backoffice/settings' },
     ],
   },
 ] as const

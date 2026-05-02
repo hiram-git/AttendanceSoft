@@ -91,15 +91,14 @@ Públicos:
 - `GET /api/auth/*` — manejado por Better-Auth (sign-in, sign-up, sign-out, get-session, etc.)
 - `GET /api/me` — devuelve la sesión actual o `null`
 
-Protegidos (requieren cookie de sesión):
+Protegidos (requieren cookie de sesión). Cada recurso tiene CRUD completo:
 
-- `GET /api/staff`
-- `GET /api/services`
-- `GET /api/clients`
-- `GET /api/appointments?date=YYYY-MM-DD` — un día
-- `GET /api/appointments?from=YYYY-MM-DD&to=YYYY-MM-DD` — rango (usado por el dashboard)
+- `GET|POST /api/staff` y `PATCH|DELETE /api/staff/:id`
+- `GET|POST /api/services` y `PATCH|DELETE /api/services/:id`
+- `GET|POST /api/clients` y `PATCH|DELETE /api/clients/:id`
+- `GET /api/appointments` (`?date=` un día, `?from=&to=` rango)
 - `POST /api/appointments`
-- `DELETE /api/appointments/:id`
+- `PATCH|DELETE /api/appointments/:id`
 
 ## Usuario demo
 
@@ -122,7 +121,18 @@ por uno que envíe el correo real (Resend, Postmark, etc.).
 
 ## Pantallas
 
-- `/` — Landing (filosofía Tesla, dark default)
-- `/login` — Login (filosofía Stripe, validación con TanStack Form + Zod)
-- `/dashboard` — Calendario mensual + métricas + agenda del día (datos vía TanStack Query)
-- `/backoffice` — Scheduler semanal de equipo (datos vía TanStack Query)
+Públicas:
+
+- `/` — Landing
+- `/login`, `/forgot-password`, `/reset-password`
+
+Protegidas (requieren sesión):
+
+- `/dashboard` — calendario mensual + métricas derivadas + agenda del día.
+- `/backoffice` — scheduler semanal de equipo y disponibilidad.
+- `/backoffice/appointments` — agenda completa con filtros (rango, tipo, estado), edit y delete.
+- `/backoffice/clients` — clientes (CRUD).
+- `/backoffice/services` — servicios (CRUD, filtro por tipo).
+- `/backoffice/staff` — personal (CRUD, picker de avatar gradient, salas separadas por coma).
+- `/backoffice/reports` — resumen del mes: totales, breakdown por tipo y carga por persona.
+- `/backoffice/settings` — placeholder.
