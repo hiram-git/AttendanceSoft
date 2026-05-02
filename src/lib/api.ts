@@ -2,13 +2,42 @@ import type { Staff, Service, Client, Appointment } from '../db/schema.ts'
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
+export class ApiError extends Error {
+  status: number
+  body: unknown
+  constructor(status: number, message: string, body: unknown) {
+    super(message)
+    this.status = status
+    this.body = body
+  }
+}
+
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     ...init,
   })
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`)
+  if (!res.ok) {
+    let body: unknown = null
+    let message = `API ${res.status}`
+    const ct = res.headers.get('content-type') ?? ''
+    if (ct.includes('application/json')) {
+      body = await res.json().catch(() => null)
+      if (
+        body &&
+        typeof body === 'object' &&
+        'message' in body &&
+        typeof body.message === 'string'
+      ) {
+        message = body.message
+      }
+    } else {
+      const text = await res.text()
+      if (text) message = text
+    }
+    throw new ApiError(res.status, message, body)
+  }
   return res.json()
 }
 

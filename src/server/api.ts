@@ -4,6 +4,7 @@ import { and, eq, gte, lte } from 'drizzle-orm'
 import { db } from '../db/index.ts'
 import { staff, services, clients, appointments } from '../db/schema.ts'
 import { auth } from './auth.ts'
+import { describeConflicts, findConflicts } from './conflicts.ts'
 
 // Forward all /api/auth/* requests to Better-Auth's fetch handler.
 // Uses explicit GET/POST instead of .mount() to avoid the known
@@ -210,7 +211,22 @@ export const api = new Elysia()
         )
         .post(
           '/api/appointments',
-          async ({ body }) => {
+          async ({ body, set }) => {
+            const conflicts = await findConflicts({
+              date: body.date,
+              startTime: body.startTime,
+              endTime: body.endTime,
+              staffId: body.staffId,
+              room: body.room,
+            })
+            if (conflicts.length > 0) {
+              set.status = 409
+              return {
+                error: 'conflict',
+                message: describeConflicts(conflicts),
+                conflicts,
+              }
+            }
             const [row] = await db.insert(appointments).values(body).returning()
             return row
           },
@@ -231,7 +247,43 @@ export const api = new Elysia()
         )
         .patch(
           '/api/appointments/:id',
-          async ({ params, body }) => {
+          async ({ params, body, set }) => {
+            const rows = await db
+              .select()
+              .from(appointments)
+              .where(eq(appointments.id, params.id))
+            if (rows.length === 0) {
+              set.status = 404
+              return { error: 'not_found' }
+            }
+            const existing = rows[0]
+            const merged = {
+              date: body.date ?? existing.date,
+              startTime: body.startTime ?? existing.startTime,
+              endTime: body.endTime ?? existing.endTime,
+              staffId: body.staffId === undefined ? existing.staffId : body.staffId,
+              room: body.room === undefined ? existing.room : body.room,
+              status: body.status ?? existing.status,
+            }
+            // Skip conflict check if the row is being marked cancelled.
+            if (merged.status !== 'cancelada') {
+              const conflicts = await findConflicts({
+                date: merged.date,
+                startTime: merged.startTime,
+                endTime: merged.endTime,
+                staffId: merged.staffId,
+                room: merged.room,
+                ignoreId: params.id,
+              })
+              if (conflicts.length > 0) {
+                set.status = 409
+                return {
+                  error: 'conflict',
+                  message: describeConflicts(conflicts),
+                  conflicts,
+                }
+              }
+            }
             const [row] = await db
               .update(appointments)
               .set(body)
