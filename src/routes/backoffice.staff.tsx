@@ -9,6 +9,7 @@ import { DataTable } from '../components/DataTable.tsx'
 import { Modal } from '../components/Modal.tsx'
 import { ConfirmDialog } from '../components/ConfirmDialog.tsx'
 import { EmptyState } from '../components/EmptyState.tsx'
+import { AvailabilityEditor } from '../components/AvailabilityEditor.tsx'
 import { NavIcon } from '../components/icons.tsx'
 import { api } from '../lib/api.ts'
 import type { Staff } from '../db/schema.ts'
@@ -222,6 +223,7 @@ function StaffPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Staff | null>(null)
   const [deleting, setDeleting] = useState<Staff | null>(null)
+  const [availabilityFor, setAvailabilityFor] = useState<Staff | null>(null)
 
   const staffQuery = useQuery({ queryKey: ['staff'], queryFn: () => api.staff() })
 
@@ -289,6 +291,9 @@ function StaffPage() {
       enableSorting: false,
       cell: ({ row }) => (
         <div className="row-actions">
+          <button className="btn-soft" onClick={() => setAvailabilityFor(row.original)}>
+            Disponibilidad
+          </button>
           <button className="btn-soft" onClick={() => setEditing(row.original)}>Editar</button>
           <button className="btn-soft" onClick={() => setDeleting(row.original)} aria-label="Eliminar">
             ✕
@@ -388,6 +393,12 @@ function StaffPage() {
           if (deleting) await deleteMut.mutateAsync(deleting.id)
           setDeleting(null)
         }}
+      />
+
+      <AvailabilityEditor
+        staff={availabilityFor}
+        open={availabilityFor !== null}
+        onOpenChange={(o) => { if (!o) setAvailabilityFor(null) }}
       />
     </AppShell>
   )
