@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom'
-import { useTheme } from '../useTheme.js'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useTheme } from '../lib/useTheme.ts'
 
-function LandingNav({ light, onToggleTheme }) {
+export const Route = createFileRoute('/')({ component: LandingPage })
+
+function LandingNav({ light, onToggleTheme }: { light: boolean; onToggleTheme: () => void }) {
   return (
     <nav className="land-nav">
       <div className="land-brand">Attendance<span className="dot">·</span>Soft</div>
@@ -54,7 +56,6 @@ function Hero() {
           </div>
         </div>
       </div>
-
       <div className="land-hero-actions">
         <a className="btn-min large" href="#demo">Solicitar demo</a>
         <a className="btn-min ghost large" href="#tour">Ver el producto</a>
@@ -66,45 +67,26 @@ function Hero() {
 function Pillars() {
   const items = [
     {
-      n: '01',
-      title: 'Agenda inteligente',
+      n: '01', title: 'Agenda inteligente',
       body: 'Reglas de disponibilidad por equipo, recurso o sala. Sin conflictos, sin huecos.',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-          <rect x="3" y="5" width="18" height="16" rx="1.5" />
-          <path d="M3 9h18M8 3v4M16 3v4" />
-        </svg>
-      ),
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><rect x="3" y="5" width="18" height="16" rx="1.5" /><path d="M3 9h18M8 3v4M16 3v4" /></svg>,
     },
     {
-      n: '02',
-      title: 'Reserva en un toque',
+      n: '02', title: 'Reserva en un toque',
       body: 'Páginas públicas para que el cliente confirme su cita en menos de 30 segundos.',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3 2" />
-        </svg>
-      ),
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
     },
     {
-      n: '03',
-      title: 'Operación en vivo',
+      n: '03', title: 'Operación en vivo',
       body: 'Tablero, métricas y avisos en tiempo real. La operación que el equipo necesita.',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-          <path d="M3 13l4-4 4 4 4-7 6 10" />
-        </svg>
-      ),
+      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M3 13l4-4 4 4 4-7 6 10" /></svg>,
     },
   ]
   return (
     <section className="land-section" id="producto">
       <div className="land-section-head">
         <div className="land-eyebrow">— Plataforma</div>
-        <h2 className="land-h2">
-          Una sola plataforma para <em>agendar, atender y entender</em> tu operación.
-        </h2>
+        <h2 className="land-h2">Una sola plataforma para <em>agendar, atender y entender</em> tu operación.</h2>
       </div>
       <div className="land-pillars">
         {items.map((it) => (
@@ -125,17 +107,11 @@ function Showcase() {
     <section className="land-section">
       <div className="land-section-head">
         <div className="land-eyebrow">— Producto</div>
-        <h2 className="land-h2">
-          Diseñado para los <em>equipos que viven en la agenda.</em>
-        </h2>
+        <h2 className="land-h2">Diseñado para los <em>equipos que viven en la agenda.</em></h2>
       </div>
       <div className="land-showcase">
-        <div className="placeholder-img">
-          <span className="ph-label">CAPTURA · DASHBOARD · 1280×960</span>
-        </div>
-        <div className="placeholder-img tall">
-          <span className="ph-label">CAPTURA · MOBILE · 720×960</span>
-        </div>
+        <div className="placeholder-img"><span className="ph-label">CAPTURA · DASHBOARD · 1280×960</span></div>
+        <div className="placeholder-img tall"><span className="ph-label">CAPTURA · MOBILE · 720×960</span></div>
       </div>
     </section>
   )
@@ -152,10 +128,7 @@ function Stats() {
     <section className="land-stats">
       {stats.map((s) => (
         <div className="land-stat" key={s.label}>
-          <div className="land-stat-num">
-            {s.num}
-            <sup>{s.sup}</sup>
-          </div>
+          <div className="land-stat-num">{s.num}<sup>{s.sup}</sup></div>
           <div className="land-stat-label">{s.label}</div>
         </div>
       ))}
@@ -171,9 +144,7 @@ function Quote() {
         <p className="land-quote-text">
           “Reemplazamos tres herramientas con AttendanceSoft. <em>El silencio operativo es lo mejor que nos pasó.</em>”
         </p>
-        <div className="land-quote-attr">
-          Camila R. · Directora de Operaciones · Clínica Vértice
-        </div>
+        <div className="land-quote-attr">Camila R. · Directora de Operaciones · Clínica Vértice</div>
       </div>
     </section>
   )
@@ -205,7 +176,7 @@ function Footer() {
   )
 }
 
-export default function LandingPage() {
+function LandingPage() {
   const { landingDark, toggleLanding } = useTheme()
   const light = !landingDark
   return (

@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
-import { ThemeCtx } from './themeContext.js'
+import type { ReactNode } from 'react'
+import { ThemeCtx } from './themeContext.ts'
 
-export function ThemeProvider({ children }) {
-  const [appDark, setAppDark] = useState(() => {
-    const v = localStorage.getItem('attsoft.appDark')
-    return v == null ? true : v === '1'
-  })
-  const [landingDark, setLandingDark] = useState(() => {
-    const v = localStorage.getItem('attsoft.landingDark')
-    return v == null ? false : v === '1'
-  })
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [appDark, setAppDark] = useState<boolean>(true)
+  const [landingDark, setLandingDark] = useState<boolean>(false)
+
+  useEffect(() => {
+    const a = localStorage.getItem('attsoft.appDark')
+    if (a != null) setAppDark(a === '1')
+    const l = localStorage.getItem('attsoft.landingDark')
+    if (l != null) setLandingDark(l === '1')
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('attsoft.appDark', appDark ? '1' : '0')

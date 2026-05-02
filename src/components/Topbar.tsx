@@ -1,8 +1,13 @@
 import { Fragment } from 'react'
-import { useTheme } from '../useTheme.js'
-import { NavIcon } from './icons.jsx'
+import { useTheme } from '../lib/useTheme.ts'
+import { NavIcon } from './icons.tsx'
 
-export default function Topbar({ here = 'Inicio', crumbPath = ['Operación', 'Inicio'] }) {
+interface Props {
+  here?: string
+  crumbPath?: ReadonlyArray<string>
+}
+
+export function Topbar({ here = 'Inicio', crumbPath = ['Operación', 'Inicio'] }: Props) {
   const { appDark, toggleApp } = useTheme()
   return (
     <header className="topbar">

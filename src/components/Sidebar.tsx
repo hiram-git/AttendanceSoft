@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { NavIcon } from './icons.jsx'
+import { Link } from '@tanstack/react-router'
+import { NavIcon } from './icons.tsx'
 
 const SECTIONS = [
   {
@@ -19,9 +19,9 @@ const SECTIONS = [
       { id: 'set', label: 'Ajustes', icon: NavIcon.set, to: '/backoffice' },
     ],
   },
-]
+] as const
 
-export default function Sidebar({ active = 'home' }) {
+export function Sidebar({ active = 'home' }: { active?: string }) {
   return (
     <aside className="sb">
       <Link to="/" className="sb-brand">
@@ -45,7 +45,7 @@ export default function Sidebar({ active = 'home' }) {
             >
               {it.icon}
               <span className="label">{it.label}</span>
-              {it.badge ? <span className="badge">{it.badge}</span> : null}
+              {'badge' in it ? <span className="badge">{it.badge}</span> : null}
             </Link>
           ))}
         </div>

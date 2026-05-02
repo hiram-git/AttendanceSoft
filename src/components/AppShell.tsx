@@ -1,8 +1,16 @@
-import Sidebar from './Sidebar.jsx'
-import Topbar from './Topbar.jsx'
-import { useTheme } from '../useTheme.js'
+import type { ReactNode } from 'react'
+import { Sidebar } from './Sidebar.tsx'
+import { Topbar } from './Topbar.tsx'
+import { useTheme } from '../lib/useTheme.ts'
 
-export default function AppShell({ active, here, crumbPath, children }) {
+interface Props {
+  active?: string
+  here?: string
+  crumbPath?: ReadonlyArray<string>
+  children: ReactNode
+}
+
+export function AppShell({ active, here, crumbPath, children }: Props) {
   const { appDark } = useTheme()
   return (
     <div

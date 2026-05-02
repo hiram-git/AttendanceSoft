@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { ThemeCtx } from './themeContext.js'
+import { ThemeCtx } from './themeContext.ts'
 
 export function useTheme() {
   const ctx = useContext(ThemeCtx)

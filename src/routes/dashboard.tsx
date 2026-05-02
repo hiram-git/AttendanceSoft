@@ -1,9 +1,15 @@
-import AppShell from '../components/AppShell.jsx'
-import { NavIcon } from '../components/icons.jsx'
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { AppShell } from '../components/AppShell.tsx'
+import { NavIcon } from '../components/icons.tsx'
+import { api } from '../lib/api.ts'
+import type { Appointment } from '../db/schema.ts'
+
+export const Route = createFileRoute('/dashboard')({ component: DashboardPage })
 
 const TODAY = 2
 
-const APPTS_BY_DAY = {
+const FALLBACK_APPTS_BY_DAY: Record<number, Array<{ t: string; l: string; k: number }>> = {
   1: [{ t: '09:00', l: 'Pérez · Consulta', k: 1 }, { t: '11:30', l: 'Soto · Limpieza', k: 2 }],
   2: [
     { t: '08:30', l: 'Méndez · Control', k: 1 },
@@ -19,12 +25,7 @@ const APPTS_BY_DAY = {
   11: [{ t: '09:00', l: 'Treviño', k: 1 }, { t: '11:30', l: 'Acuña', k: 1 }],
   12: [{ t: '10:00', l: 'Ortiz · Revisión', k: 2 }],
   13: [{ t: '09:00', l: 'Beltrán', k: 1 }, { t: '14:00', l: 'Cano', k: 3 }, { t: '16:30', l: 'Solís', k: 1 }],
-  14: [
-    { t: '08:00', l: 'Quintero', k: 2 },
-    { t: '11:00', l: 'Lara', k: 1 },
-    { t: '15:00', l: 'Hidalgo', k: 4 },
-    { t: '17:30', l: 'Cuevas', k: 1 },
-  ],
+  14: [{ t: '08:00', l: 'Quintero', k: 2 }, { t: '11:00', l: 'Lara', k: 1 }, { t: '15:00', l: 'Hidalgo', k: 4 }, { t: '17:30', l: 'Cuevas', k: 1 }],
   15: [{ t: '09:30', l: 'Velasco', k: 1 }],
   18: [{ t: '10:00', l: 'Moreno', k: 1 }, { t: '13:00', l: 'Paredes', k: 2 }],
   19: [{ t: '09:00', l: 'Casas', k: 1 }, { t: '12:30', l: 'Ramos', k: 1 }, { t: '15:00', l: 'Tovar', k: 2 }],
@@ -32,27 +33,47 @@ const APPTS_BY_DAY = {
   21: [{ t: '09:00', l: 'Ibarra', k: 1 }, { t: '11:30', l: 'Lugo', k: 2 }, { t: '15:00', l: 'Peña', k: 1 }],
   22: [{ t: '10:00', l: 'Fuentes', k: 1 }, { t: '14:00', l: 'Barrios · Largo', k: 3 }],
   25: [{ t: '09:00', l: 'Cervantes', k: 1 }],
-  26: [
-    { t: '08:00', l: 'Loera', k: 1 },
-    { t: '11:00', l: 'Sandoval', k: 2 },
-    { t: '14:00', l: 'Tapia', k: 1 },
-    { t: '16:30', l: 'Andrade', k: 1 },
-  ],
+  26: [{ t: '08:00', l: 'Loera', k: 1 }, { t: '11:00', l: 'Sandoval', k: 2 }, { t: '14:00', l: 'Tapia', k: 1 }, { t: '16:30', l: 'Andrade', k: 1 }],
   27: [{ t: '09:30', l: 'Bustos', k: 2 }, { t: '13:00', l: 'Avilés', k: 1 }],
   28: [{ t: '10:00', l: 'Cordero', k: 4 }, { t: '15:00', l: 'Patiño', k: 1 }],
   29: [{ t: '09:00', l: 'Jaramillo', k: 1 }, { t: '11:00', l: 'Ávalos', k: 2 }, { t: '14:30', l: 'Pineda', k: 1 }],
 }
 
-function MonthCalendar() {
-  const cells = []
-  const apriLead = [27, 28, 29, 30]
-  apriLead.forEach((d, i) => cells.push({ key: `pre-${i}`, day: d, muted: true, items: [] }))
+const KIND_TO_NUM: Record<string, number> = {
+  consulta: 1,
+  seguimiento: 2,
+  procedimiento: 3,
+  bloqueo: 4,
+}
+
+function MonthCalendar({ todayAppts }: { todayAppts: Array<Appointment> | undefined }) {
+  const apptsByDay: Record<number, Array<{ t: string; l: string; k: number }>> = {
+    ...FALLBACK_APPTS_BY_DAY,
+  }
+  if (todayAppts && todayAppts.length > 0) {
+    apptsByDay[TODAY] = todayAppts.map((a) => ({
+      t: a.startTime.slice(0, 5),
+      l: a.label,
+      k: KIND_TO_NUM[a.kind] ?? 1,
+    }))
+  }
+
+  const cells: Array<{
+    key: string
+    day: number
+    muted: boolean
+    items: Array<{ t: string; l: string; k: number }>
+    isToday?: boolean
+  }> = []
+  ;[27, 28, 29, 30].forEach((d, i) =>
+    cells.push({ key: `pre-${i}`, day: d, muted: true, items: [] }),
+  )
   for (let d = 1; d <= 31; d++) {
     cells.push({
       key: `m-${d}`,
       day: d,
       muted: false,
-      items: APPTS_BY_DAY[d] || [],
+      items: apptsByDay[d] ?? [],
       isToday: d === TODAY,
     })
   }
@@ -68,9 +89,7 @@ function MonthCalendar() {
   return (
     <div className="card cal-card">
       <div className="cal-head">
-        <h2>
-          Mayo <em>2026</em>
-        </h2>
+        <h2>Mayo <em>2026</em></h2>
         <div className="nav-mo">
           <button>‹</button>
           <span className="label">Mayo de 2026</span>
@@ -87,25 +106,18 @@ function MonthCalendar() {
       </div>
 
       <div className="cal-weekdays">
-        {weekdays.map((w) => (
-          <div key={w}>{w}</div>
-        ))}
+        {weekdays.map((w) => <div key={w}>{w}</div>)}
       </div>
 
       <div className="cal-grid">
         {cells.map((c) => {
-          const items = c.items || []
-          const visible = items.slice(0, 3)
-          const more = items.length - visible.length
-          const density = Math.min(items.length, 3)
+          const visible = c.items.slice(0, 3)
+          const more = c.items.length - visible.length
+          const density = Math.min(c.items.length, 3)
           return (
             <div
               key={c.key}
-              className={
-                'cal-day' +
-                (c.muted ? ' muted' : '') +
-                (c.isToday ? ' today' : '')
-              }
+              className={'cal-day' + (c.muted ? ' muted' : '') + (c.isToday ? ' today' : '')}
             >
               <span className="num">{c.day}</span>
               {density > 0 && !c.muted && (
@@ -138,7 +150,7 @@ function MonthCalendar() {
   )
 }
 
-function Spark({ pts, color = 'var(--accent)' }) {
+function Spark({ pts, color = 'var(--accent)' }: { pts: string; color?: string }) {
   return (
     <svg width="60" height="22" viewBox="0 0 60 22" className="spark" fill="none">
       <polyline points={pts} stroke={color} strokeWidth="1.4" fill="none" />
@@ -146,20 +158,18 @@ function Spark({ pts, color = 'var(--accent)' }) {
   )
 }
 
-function MetricStrip() {
+function MetricStrip({ todayCount }: { todayCount: number }) {
   return (
     <div className="metrics">
       <div className="metric">
         <div className="lbl">Citas hoy</div>
-        <div className="val">38</div>
+        <div className="val">{todayCount || 38}</div>
         <div className="delta up">↑ 12% vs. ayer</div>
         <Spark pts="0,16 8,14 16,15 24,10 32,12 40,7 48,8 60,4" />
       </div>
       <div className="metric">
         <div className="lbl">Ocupación</div>
-        <div className="val">
-          84<span style={{ fontSize: 16, color: 'var(--app-muted)' }}>%</span>
-        </div>
+        <div className="val">84<span style={{ fontSize: 16, color: 'var(--app-muted)' }}>%</span></div>
         <div className="delta up">↑ 3 pts</div>
         <Spark pts="0,12 10,13 20,9 30,11 40,8 50,6 60,7" color="#10a76b" />
       </div>
@@ -203,10 +213,7 @@ function MiniCal() {
             if (!d) return <div key={i} className="d muted"> </div>
             const n = parseInt(d, 10)
             return (
-              <div
-                key={i}
-                className={'d' + (n === TODAY ? ' today' : '') + (has.has(n) ? ' has' : '')}
-              >
+              <div key={i} className={'d' + (n === TODAY ? ' today' : '') + (has.has(n) ? ' has' : '')}>
                 {d}
               </div>
             )
@@ -217,17 +224,39 @@ function MiniCal() {
   )
 }
 
-function UpcomingList() {
-  const items = [
-    { t: '08:30', e: '09:00', n: 'Andrea Méndez', s: 'Control trimestral · Sala 2', av: 'AM', col: 'linear-gradient(135deg,#c5d2ff,#dfe6ff)' },
-    { t: '10:00', e: '10:45', n: 'Diego Vázquez', s: 'Evaluación inicial · Sala 1', av: 'DV', col: 'linear-gradient(135deg,#ffd5ee,#ffe6f4)' },
-    { t: '13:00', e: '13:30', n: 'Lucía Romero', s: 'Procedimiento · Sala 3', av: 'LR', col: 'linear-gradient(135deg,#fde2c5,#ffeed8)' },
-    { t: '16:00', e: '16:45', n: 'Tomás Castro', s: 'Consulta · Sala 2', av: 'TC', col: 'linear-gradient(135deg,#c4f0d8,#dff5e8)' },
-  ]
+const FALLBACK_TODAY = [
+  { t: '08:30', e: '09:00', n: 'Andrea Méndez', s: 'Control trimestral · Sala 2', av: 'AM', col: 'linear-gradient(135deg,#c5d2ff,#dfe6ff)' },
+  { t: '10:00', e: '10:45', n: 'Diego Vázquez', s: 'Evaluación inicial · Sala 1', av: 'DV', col: 'linear-gradient(135deg,#ffd5ee,#ffe6f4)' },
+  { t: '13:00', e: '13:30', n: 'Lucía Romero', s: 'Procedimiento · Sala 3', av: 'LR', col: 'linear-gradient(135deg,#fde2c5,#ffeed8)' },
+  { t: '16:00', e: '16:45', n: 'Tomás Castro', s: 'Consulta · Sala 2', av: 'TC', col: 'linear-gradient(135deg,#c4f0d8,#dff5e8)' },
+]
+
+function UpcomingList({ todayAppts }: { todayAppts: Array<Appointment> | undefined }) {
+  const items =
+    todayAppts && todayAppts.length > 0
+      ? todayAppts.map((a) => {
+          const [name] = a.label.split(' · ')
+          const initials = name
+            .split(' ')
+            .map((p) => p[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase()
+          return {
+            t: a.startTime.slice(0, 5),
+            e: a.endTime.slice(0, 5),
+            n: name,
+            s: a.label.includes(' · ') ? a.label.split(' · ').slice(1).join(' · ') : a.label,
+            av: initials,
+            col: 'linear-gradient(135deg,#c5d2ff,#dfe6ff)',
+          }
+        })
+      : FALLBACK_TODAY
+
   return (
     <div className="card aside-card">
       <div className="card-head">
-        <h3>Hoy · 04 citas</h3>
+        <h3>Hoy · {String(items.length).padStart(2, '0')} citas</h3>
         <span className="sub">Mar 02 May</span>
         <button className="icon-btn" style={{ marginLeft: 'auto' }}>›</button>
       </div>
@@ -253,7 +282,12 @@ function UpcomingList() {
   )
 }
 
-export default function Dashboard() {
+function DashboardPage() {
+  const todayAppts = useQuery({
+    queryKey: ['appointments', '2026-05-02'],
+    queryFn: () => api.appointments('2026-05-02'),
+  })
+
   return (
     <AppShell active="home" here="Inicio" crumbPath={['Operación', 'Inicio']}>
       <div className="page-head">
@@ -270,12 +304,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <MetricStrip />
+      <MetricStrip todayCount={todayAppts.data?.length ?? 0} />
 
       <div className="dash-grid">
-        <MonthCalendar />
+        <MonthCalendar todayAppts={todayAppts.data} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <UpcomingList />
+          <UpcomingList todayAppts={todayAppts.data} />
           <MiniCal />
         </div>
       </div>

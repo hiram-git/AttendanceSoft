@@ -1,16 +1,22 @@
-import AppShell from '../components/AppShell.jsx'
-import { NavIcon } from '../components/icons.jsx'
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { AppShell } from '../components/AppShell.tsx'
+import { NavIcon } from '../components/icons.tsx'
+import { api } from '../lib/api.ts'
+import type { Staff } from '../db/schema.ts'
 
-const STAFF = [
-  { id: 1, nm: 'Andrea Méndez', ro: 'Médica general', av: 'AM', col: 'linear-gradient(135deg,#c5d2ff,#dfe6ff)', tags: ['SALA 1', 'SALA 2'] },
-  { id: 2, nm: 'Diego Vázquez', ro: 'Especialista', av: 'DV', col: 'linear-gradient(135deg,#ffd5ee,#ffe6f4)', tags: ['SALA 3'] },
-  { id: 3, nm: 'Lucía Romero', ro: 'Procedimientos', av: 'LR', col: 'linear-gradient(135deg,#fde2c5,#ffeed8)', tags: ['QUIRÓFANO'] },
-  { id: 4, nm: 'Tomás Castro', ro: 'Consultas', av: 'TC', col: 'linear-gradient(135deg,#c4f0d8,#dff5e8)', tags: ['SALA 2'] },
-  { id: 5, nm: 'Sofía Aguilar', ro: 'Médica general', av: 'SA', col: 'linear-gradient(135deg,#ffd1c5,#ffe2da)', tags: ['SALA 1'] },
-  { id: 6, nm: 'Joaquín Núñez', ro: 'Diagnóstico', av: 'JN', col: 'linear-gradient(135deg,#e2d4ff,#efe5ff)', tags: ['SALA 4'] },
+export const Route = createFileRoute('/backoffice')({ component: BackofficePage })
+
+const FALLBACK_STAFF: Array<Staff> = [
+  { id: '1', name: 'Andrea Méndez', role: 'Médica general', initials: 'AM', avatarGradient: 'linear-gradient(135deg,#c5d2ff,#dfe6ff)', rooms: ['SALA 1', 'SALA 2'] },
+  { id: '2', name: 'Diego Vázquez', role: 'Especialista', initials: 'DV', avatarGradient: 'linear-gradient(135deg,#ffd5ee,#ffe6f4)', rooms: ['SALA 3'] },
+  { id: '3', name: 'Lucía Romero', role: 'Procedimientos', initials: 'LR', avatarGradient: 'linear-gradient(135deg,#fde2c5,#ffeed8)', rooms: ['QUIRÓFANO'] },
+  { id: '4', name: 'Tomás Castro', role: 'Consultas', initials: 'TC', avatarGradient: 'linear-gradient(135deg,#c4f0d8,#dff5e8)', rooms: ['SALA 2'] },
+  { id: '5', name: 'Sofía Aguilar', role: 'Médica general', initials: 'SA', avatarGradient: 'linear-gradient(135deg,#ffd1c5,#ffe2da)', rooms: ['SALA 1'] },
+  { id: '6', name: 'Joaquín Núñez', role: 'Diagnóstico', initials: 'JN', avatarGradient: 'linear-gradient(135deg,#e2d4ff,#efe5ff)', rooms: ['SALA 4'] },
 ]
 
-const SCHEDULE = [
+const SCHEDULE: Array<Array<{ off?: boolean; items?: Array<{ t: string; l: string; k: number }> }>> = [
   [
     { items: [{ t: '08:30', l: 'Méndez control', k: 1 }, { t: '10:00', l: 'Vázquez eval.', k: 2 }] },
     { items: [{ t: '09:00', l: 'Treviño', k: 1 }, { t: '11:30', l: 'Acuña', k: 1 }, { t: '15:00', l: 'Block · admin', k: 0 }] },
@@ -77,7 +83,7 @@ const WEEK_DAYS = [
   { wd: 'DOM', dn: '04', util: '—', utilN: 0, off: true, today: false },
 ]
 
-function StaffScheduler() {
+function StaffScheduler({ staff }: { staff: Array<Staff> }) {
   return (
     <div className="sched-wrap">
       <div className="bo-filters">
@@ -101,7 +107,7 @@ function StaffScheduler() {
       <div className="sched">
         <div className="sched-inner">
           <div className="sched-week-head">
-            <div className="corner">Equipo · 6 personas</div>
+            <div className="corner">Equipo · {staff.length} personas</div>
             {WEEK_DAYS.map((d, i) => (
               <div key={i} className={'sched-day-h' + (d.today ? ' today' : '')}>
                 <span className="wd">{d.wd}</span>
@@ -118,29 +124,26 @@ function StaffScheduler() {
             ))}
           </div>
 
-          {STAFF.map((p, ri) => (
+          {staff.slice(0, 6).map((p, ri) => (
             <div className="sched-row" key={p.id}>
               <div className="sched-staff">
-                <span className="av" style={{ background: p.col }}>{p.av}</span>
+                <span className="av" style={{ background: p.avatarGradient }}>{p.initials}</span>
                 <div className="meta">
-                  <span className="nm">{p.nm}</span>
-                  <span className="ro">{p.ro}</span>
+                  <span className="nm">{p.name}</span>
+                  <span className="ro">{p.role}</span>
                   <span className="tags">
-                    {p.tags.map((t) => (
-                      <span className="tag" key={t}>{t}</span>
-                    ))}
+                    {p.rooms.map((t) => <span className="tag" key={t}>{t}</span>)}
                   </span>
                 </div>
               </div>
-              {SCHEDULE[ri].map((cell, ci) => (
+              {(SCHEDULE[ri] ?? []).map((cell, ci) => (
                 <div key={ci} className={'sched-cell' + (cell.off ? ' off' : '')}>
-                  {cell.items &&
-                    cell.items.slice(0, 3).map((it, ii) => (
-                      <div key={ii} className={'slot' + (it.k === 0 ? ' block' : ` k${it.k}`)}>
-                        <span className="t">{it.t}</span>
-                        <span>{it.l}</span>
-                      </div>
-                    ))}
+                  {cell.items?.slice(0, 3).map((it, ii) => (
+                    <div key={ii} className={'slot' + (it.k === 0 ? ' block' : ` k${it.k}`)}>
+                      <span className="t">{it.t}</span>
+                      <span>{it.l}</span>
+                    </div>
+                  ))}
                   {cell.items && cell.items.length > 3 && (
                     <span style={{ fontSize: 11, color: 'var(--app-muted)', fontWeight: 500, paddingLeft: 4 }}>
                       + {cell.items.length - 3} más
@@ -156,15 +159,16 @@ function StaffScheduler() {
   )
 }
 
-function StaffStats() {
-  const rows = [
-    { nm: 'Andrea Méndez', av: 'AM', col: 'linear-gradient(135deg,#c5d2ff,#dfe6ff)', pc: 92, warn: false },
-    { nm: 'Diego Vázquez', av: 'DV', col: 'linear-gradient(135deg,#ffd5ee,#ffe6f4)', pc: 78, warn: false },
-    { nm: 'Lucía Romero', av: 'LR', col: 'linear-gradient(135deg,#fde2c5,#ffeed8)', pc: 96, warn: true },
-    { nm: 'Tomás Castro', av: 'TC', col: 'linear-gradient(135deg,#c4f0d8,#dff5e8)', pc: 64, warn: false },
-    { nm: 'Sofía Aguilar', av: 'SA', col: 'linear-gradient(135deg,#ffd1c5,#ffe2da)', pc: 71, warn: false },
-    { nm: 'Joaquín Núñez', av: 'JN', col: 'linear-gradient(135deg,#e2d4ff,#efe5ff)', pc: 38, warn: false },
-  ]
+const STAFF_LOAD: Array<{ pc: number; warn: boolean }> = [
+  { pc: 92, warn: false },
+  { pc: 78, warn: false },
+  { pc: 96, warn: true },
+  { pc: 64, warn: false },
+  { pc: 71, warn: false },
+  { pc: 38, warn: false },
+]
+
+function StaffStats({ staff }: { staff: Array<Staff> }) {
   return (
     <div className="card">
       <div className="card-head">
@@ -172,14 +176,17 @@ function StaffStats() {
         <span className="sub">Esta semana</span>
       </div>
       <div style={{ padding: '4px 18px 14px' }}>
-        {rows.map((r, i) => (
-          <div key={i} className="staff-stat-row">
-            <span className="av" style={{ background: r.col }}>{r.av}</span>
-            <span className="nm">{r.nm}</span>
-            <span className="bar"><i style={{ width: `${r.pc}%` }} /></span>
-            <span className={'pc' + (r.warn ? ' warn' : '')}>{r.pc}%</span>
-          </div>
-        ))}
+        {staff.slice(0, 6).map((s, i) => {
+          const load = STAFF_LOAD[i] ?? { pc: 50, warn: false }
+          return (
+            <div key={s.id} className="staff-stat-row">
+              <span className="av" style={{ background: s.avatarGradient }}>{s.initials}</span>
+              <span className="nm">{s.name}</span>
+              <span className="bar"><i style={{ width: `${load.pc}%` }} /></span>
+              <span className={'pc' + (load.warn ? ' warn' : '')}>{load.pc}%</span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -214,7 +221,10 @@ function Alerts() {
   )
 }
 
-export default function Backoffice() {
+function BackofficePage() {
+  const staffQuery = useQuery({ queryKey: ['staff'], queryFn: () => api.staff() })
+  const staff = staffQuery.data && staffQuery.data.length > 0 ? staffQuery.data : FALLBACK_STAFF
+
   return (
     <AppShell
       active="staff"
@@ -236,23 +246,19 @@ export default function Backoffice() {
       <div className="bo-head-row">
         <div className="seg">
           <button className="active">
-            Disponibilidad <span style={{ marginLeft: 6, color: 'var(--app-muted)' }}>·6</span>
+            Disponibilidad <span style={{ marginLeft: 6, color: 'var(--app-muted)' }}>·{staff.length}</span>
           </button>
-          <button>
-            Personas <span style={{ marginLeft: 6, color: 'var(--app-muted)' }}>·12</span>
-          </button>
-          <button>
-            Salas <span style={{ marginLeft: 6, color: 'var(--app-muted)' }}>·4</span>
-          </button>
+          <button>Personas <span style={{ marginLeft: 6, color: 'var(--app-muted)' }}>·12</span></button>
+          <button>Salas <span style={{ marginLeft: 6, color: 'var(--app-muted)' }}>·4</span></button>
           <button>Reglas</button>
           <button>Permisos</button>
         </div>
       </div>
 
       <div className="bo-grid">
-        <StaffScheduler />
+        <StaffScheduler staff={staff} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <StaffStats />
+          <StaffStats staff={staff} />
           <Alerts />
         </div>
       </div>
