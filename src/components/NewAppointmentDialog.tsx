@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { api } from '../lib/api.ts'
 import { NavIcon } from './icons.tsx'
+import { Modal } from './Modal.tsx'
 
 const schema = z.object({
   date: z.string().min(1, 'Requerido'),
@@ -93,40 +94,14 @@ export function NewAppointmentDialog({ open, onOpenChange, defaultDate }: Props)
     }
   }, [open, form])
 
-  // ESC to close
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onOpenChange(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onOpenChange])
-
-  if (!open) return null
-
   return (
-    <div
-      className="modal-backdrop"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onOpenChange(false)
-      }}
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Nueva cita"
+      subtitle="Crea una cita en el calendario"
     >
-      <div className="modal-card card elevated" role="dialog" aria-modal="true">
-        <div className="card-head">
-          <h3>Nueva cita</h3>
-          <span className="sub">Crea una cita en el calendario</span>
-          <button
-            className="icon-btn"
-            style={{ marginLeft: 'auto' }}
-            aria-label="Cerrar"
-            onClick={() => onOpenChange(false)}
-          >
-            ✕
-          </button>
-        </div>
-
-        <form
+      <form
           className="modal-body"
           onSubmit={(e) => {
             e.preventDefault()
@@ -333,7 +308,6 @@ export function NewAppointmentDialog({ open, onOpenChange, defaultDate }: Props)
             </form.Subscribe>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   )
 }

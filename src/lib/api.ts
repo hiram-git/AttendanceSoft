@@ -12,10 +12,43 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json()
 }
 
+const json = (method: 'POST' | 'PATCH', body: unknown): RequestInit => ({
+  method,
+  body: JSON.stringify(body),
+})
+
+const del = (): RequestInit => ({ method: 'DELETE' })
+
+export type StaffInput = Omit<Staff, 'id'>
+export type ServiceInput = Omit<Service, 'id'>
+export type ClientInput = Omit<Client, 'id' | 'createdAt'>
+export type AppointmentInput = Omit<Appointment, 'id' | 'createdAt' | 'status'> & {
+  status?: Appointment['status']
+}
+
 export const api = {
+  // Staff
   staff: () => http<Array<Staff>>('/api/staff'),
+  createStaff: (b: StaffInput) => http<Staff>('/api/staff', json('POST', b)),
+  updateStaff: (id: string, b: Partial<StaffInput>) =>
+    http<Staff>(`/api/staff/${id}`, json('PATCH', b)),
+  deleteStaff: (id: string) => http<{ ok: true }>(`/api/staff/${id}`, del()),
+
+  // Services
   services: () => http<Array<Service>>('/api/services'),
+  createService: (b: ServiceInput) => http<Service>('/api/services', json('POST', b)),
+  updateService: (id: string, b: Partial<ServiceInput>) =>
+    http<Service>(`/api/services/${id}`, json('PATCH', b)),
+  deleteService: (id: string) => http<{ ok: true }>(`/api/services/${id}`, del()),
+
+  // Clients
   clients: () => http<Array<Client>>('/api/clients'),
+  createClient: (b: ClientInput) => http<Client>('/api/clients', json('POST', b)),
+  updateClient: (id: string, b: Partial<ClientInput>) =>
+    http<Client>(`/api/clients/${id}`, json('PATCH', b)),
+  deleteClient: (id: string) => http<{ ok: true }>(`/api/clients/${id}`, del()),
+
+  // Appointments
   appointments: (params?: { date?: string; from?: string; to?: string }) => {
     const qs = new URLSearchParams()
     if (params?.date) qs.set('date', params.date)
@@ -24,9 +57,10 @@ export const api = {
     const suffix = qs.toString() ? `?${qs.toString()}` : ''
     return http<Array<Appointment>>(`/api/appointments${suffix}`)
   },
-  createAppointment: (body: Omit<Appointment, 'id' | 'createdAt' | 'status'>) =>
-    http<Appointment>('/api/appointments', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }),
+  createAppointment: (b: AppointmentInput) =>
+    http<Appointment>('/api/appointments', json('POST', b)),
+  updateAppointment: (id: string, b: Partial<AppointmentInput>) =>
+    http<Appointment>(`/api/appointments/${id}`, json('PATCH', b)),
+  deleteAppointment: (id: string) =>
+    http<{ ok: true }>(`/api/appointments/${id}`, del()),
 }
