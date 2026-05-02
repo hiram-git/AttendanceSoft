@@ -1,0 +1,124 @@
+/* AttendanceSoft — Design tokens */
+
+:root {
+  /* === Type === */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* === Stripe-ish app palette (light defaults) === */
+  --app-bg:        #ffffff;
+  --app-surface:   #ffffff;
+  --app-surface-2: #f7f8fb;
+  --app-border:    #e5edf5;
+  --app-border-strong: #d6dbe8;
+  --app-heading:   #0a1f3a;
+  --app-label:     #2a3a55;
+  --app-body:      #5b6b85;
+  --app-muted:     #8693a8;
+
+  /* Accent — overridable via tweaks */
+  --accent:        #635bff;
+  --accent-hover:  #4d44e0;
+  --accent-soft:   #eeecff;
+  --accent-ring:   rgba(99, 91, 255, 0.22);
+  --accent-grad-from: #635bff;
+  --accent-grad-to:   #a78bfa;
+
+  --success:       #10a76b;
+  --success-bg:    rgba(16, 167, 107, 0.12);
+  --warning:       #c2862c;
+  --danger:        #e0455a;
+  --danger-bg:     rgba(224, 69, 90, 0.10);
+
+  --shadow-1: 0 1px 2px rgba(20, 30, 60, 0.06);
+  --shadow-2: 0 1px 2px rgba(20, 30, 60, 0.06), 0 6px 20px -8px rgba(35, 45, 90, 0.18);
+  --shadow-3: 0 1px 2px rgba(20, 30, 60, 0.06), 0 18px 36px -18px rgba(35, 45, 90, 0.22), 0 30px 45px -30px rgba(35, 45, 90, 0.18);
+  --shadow-pop: 0 14px 21px -14px rgba(3, 8, 40, 0.30), 0 8px 17px -8px rgba(0,0,0,.12);
+
+  --radius-1: 4px;
+  --radius-2: 6px;
+  --radius-3: 8px;
+  --radius-4: 12px;
+}
+
+[data-theme="dark"] {
+  --app-bg:        #0b1220;
+  --app-surface:   #111a2e;
+  --app-surface-2: #0e1626;
+  --app-border:    #1d2a44;
+  --app-border-strong: #2a3a5c;
+  --app-heading:   #f1f5fb;
+  --app-label:     #c9d3e4;
+  --app-body:      #8ea0bd;
+  --app-muted:     #6a7a96;
+
+  --accent-soft:   rgba(99, 91, 255, 0.16);
+  --accent-ring:   rgba(99, 91, 255, 0.35);
+
+  --success-bg:    rgba(16, 167, 107, 0.18);
+  --danger-bg:     rgba(224, 69, 90, 0.18);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 24px -8px rgba(0, 0, 0, 0.55);
+  --shadow-3: 0 2px 4px rgba(0, 0, 0, 0.3), 0 24px 48px -20px rgba(0, 0, 0, 0.7);
+  --shadow-pop: 0 24px 48px -16px rgba(0, 0, 0, 0.7);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background: var(--app-bg);
+  color: var(--app-heading);
+}
+button { font-family: inherit; }
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+
+/* Striped placeholder for imagery */
+.placeholder-img {
+  position: relative;
+  overflow: hidden;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255,255,255,0.04) 0,
+    rgba(255,255,255,0.04) 12px,
+    rgba(255,255,255,0.08) 12px,
+    rgba(255,255,255,0.08) 24px
+  );
+  background-color: #11151c;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.placeholder-img.light {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(0,0,0,0.04) 0,
+    rgba(0,0,0,0.04) 12px,
+    rgba(0,0,0,0.08) 12px,
+    rgba(0,0,0,0.08) 24px
+  );
+  background-color: #eef0f4;
+  color: rgba(20,30,50,0.5);
+}
+.placeholder-img > .ph-label {
+  position: absolute; top: 10px; left: 12px;
+  text-transform: uppercase;
+}
+
+/* Stripe-style focus ring */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* Shared scrollbars */
+.app-scroll { scrollbar-width: thin; scrollbar-color: rgba(120,140,180,0.3) transparent; }
+.app-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.app-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120,140,180,0.3); border-radius: 8px; border: 2px solid transparent; background-clip: content-box;
+}
