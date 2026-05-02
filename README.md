@@ -179,3 +179,38 @@ plataforma distinta:
 Setea las variables desde el panel de la plataforma (no las commits).
 Después del primer deploy, corre `bun run db:push` y `bun run db:seed`
 contra la `DATABASE_URL` de prod (una sola vez).
+
+## Troubleshooting
+
+### Los enlaces del sidebar no funcionan / formularios no responden
+
+Casi siempre es porque el **API no está corriendo**. `bun run dev` levanta
+web (Vite, :3000) **y** API (Elysia, :3001) en paralelo via
+`concurrently`. Levantar solo la base de datos no es suficiente.
+
+Receta de bring-up desde cero:
+
+```bash
+bun run db:up        # Postgres en docker (o tu instancia local en :5432)
+bun run db:push      # crea schema
+bun run db:seed      # datos demo + usuario camila@vertice.mx / attendancesoft
+bun run dev          # web + api en paralelo
+```
+
+Verificación rápida de que ambos están vivos:
+
+```bash
+curl -s http://localhost:3001/api/health     # debe devolver {"ok":true}
+curl -sI http://localhost:3000/              # debe devolver 200
+```
+
+Si el API responde pero las rutas protegidas siguen sin funcionar:
+
+1. Borra cookies y storage de `localhost:3000` y `localhost:3001` desde
+   los DevTools del navegador.
+2. Vuelve a hacer sign-in con las credenciales del seed
+   (`camila@vertice.mx` / `attendancesoft`).
+
+Cuando el API se cae mientras estás en una ruta protegida, en lugar de
+quedarte en "Cargando…" infinito el shell muestra una tarjeta
+explicando qué pasó y un botón "Reintentar".

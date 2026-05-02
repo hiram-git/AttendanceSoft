@@ -474,3 +474,69 @@ select.input {
   0%   { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
+
+/* ───── Auth fallback (RequireAuth states) ───── */
+.auth-fallback {
+  display: grid; place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--app-bg);
+  color: var(--app-muted);
+  font-family: var(--font-mono);
+  font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+}
+.auth-fallback-card {
+  font-family: var(--font-sans);
+  letter-spacing: normal; text-transform: none;
+  max-width: 520px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-2);
+  padding: 28px;
+  display: flex; flex-direction: column; gap: 14px;
+  text-align: left;
+}
+.auth-fallback-tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.18em;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border: 1px solid color-mix(in oklab, var(--danger) 30%, transparent);
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+.auth-fallback-card h2 {
+  margin: 0;
+  font-size: 22px; font-weight: 400; letter-spacing: -0.015em;
+  color: var(--app-heading);
+}
+.auth-fallback-card p {
+  margin: 0;
+  font-size: 14px; line-height: 1.55;
+  color: var(--app-body);
+}
+.auth-fallback-card code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--app-heading);
+}
+.auth-fallback-card pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-2);
+  padding: 10px 12px;
+  color: var(--app-heading);
+  overflow-x: auto;
+}
+.auth-fallback-hint { color: var(--app-muted) !important; font-size: 13px !important; }
+.auth-fallback-card .btn-soft { align-self: flex-start; }
