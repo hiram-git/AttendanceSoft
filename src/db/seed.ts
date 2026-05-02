@@ -5,6 +5,7 @@ import {
   staffAvailability,
   services,
   clients,
+  clientInvitations,
   appointments,
   user as userTable,
   session as sessionTable,
@@ -21,6 +22,7 @@ async function seed() {
   console.log('Seeding database…')
 
   await db.delete(appointments)
+  await db.delete(clientInvitations)
   await db.delete(clients)
   await db.delete(services)
   await db.delete(staffAvailability)
@@ -30,11 +32,17 @@ async function seed() {
   await db.delete(verificationTable)
   await db.delete(userTable)
 
-  // Demo user via Better-Auth (handles password hashing + account row)
+  // Demo user via Better-Auth (handles password hashing + account row).
+  // Pass role explicitly so staff vs client is set on creation.
   await auth.api.signUpEmail({
-    body: { email: DEMO_EMAIL, password: DEMO_PASSWORD, name: DEMO_NAME },
+    body: {
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+      name: DEMO_NAME,
+      role: 'staff',
+    },
   })
-  console.log(`Demo user: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`)
+  console.log(`Demo staff user: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`)
 
   const insertedStaff = await db
     .insert(staff)

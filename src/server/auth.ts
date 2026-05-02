@@ -30,6 +30,20 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
+  user: {
+    additionalFields: {
+      role: {
+        type: 'string',
+        defaultValue: 'staff',
+        input: true,
+      },
+      clientId: {
+        type: 'string',
+        required: false,
+        input: true,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,

@@ -12,12 +12,20 @@ import {
 
 // ────── Better-Auth tables ──────
 
+export const userRoleEnum = pgEnum('user_role', ['staff', 'client'])
+
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').notNull().default(false),
   name: text('name').notNull(),
   image: text('image'),
+  role: userRoleEnum('role').notNull().default('staff'),
+  // When role='client' this links the auth user to a row in `clients`.
+  // Forward reference to `clients` (defined below).
+  clientId: uuid('client_id').references(() => clients.id, {
+    onDelete: 'set null',
+  }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
@@ -116,6 +124,22 @@ export const clients = pgTable('clients', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
+/**
+ * Pending invitations for a client to claim a portal account.
+ * Operator generates one per client; the link `/portal/invite/:token`
+ * lets the client set a password and auto-creates their `user` row.
+ */
+export const clientInvitations = pgTable('client_invitations', {
+  id: uuid().primaryKey().defaultRandom(),
+  clientId: uuid('client_id')
+    .notNull()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  token: text().notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  usedAt: timestamp('used_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 export const appointments = pgTable('appointments', {
   id: uuid().primaryKey().defaultRandom(),
   date: date().notNull(),
@@ -135,6 +159,8 @@ export type Staff = typeof staff.$inferSelect
 export type StaffAvailability = typeof staffAvailability.$inferSelect
 export type Service = typeof services.$inferSelect
 export type Client = typeof clients.$inferSelect
+export type ClientInvitation = typeof clientInvitations.$inferSelect
 export type Appointment = typeof appointments.$inferSelect
 export type User = typeof user.$inferSelect
 export type Session = typeof session.$inferSelect
+export type UserRole = (typeof userRoleEnum.enumValues)[number]
