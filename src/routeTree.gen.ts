@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -25,6 +26,11 @@ import { Route as BackofficeAppointmentsRouteImport } from './routes/backoffice.
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
   '/backoffice/clients': typeof BackofficeClientsRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
   '/backoffice/clients': typeof BackofficeClientsRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
   '/backoffice/clients': typeof BackofficeClientsRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/profile'
     | '/reset-password'
     | '/backoffice/appointments'
     | '/backoffice/clients'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/profile'
     | '/reset-password'
     | '/backoffice/appointments'
     | '/backoffice/clients'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/profile'
     | '/reset-password'
     | '/backoffice/appointments'
     | '/backoffice/clients'
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -297,6 +317,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport

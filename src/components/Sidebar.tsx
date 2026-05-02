@@ -77,11 +77,17 @@ export function Sidebar({ active = 'home' }: { active?: string }) {
       <div className="sb-spacer" />
 
       <div className="sb-user">
-        <div className="sb-avatar">{userInitials}</div>
-        <div className="sb-user-info">
-          <span className="nm">{userName}</span>
-          <span className="ml">{userEmail}</span>
-        </div>
+        <Link
+          to="/profile"
+          aria-label="Ir al perfil"
+          style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flex: 1, minWidth: 0 }}
+        >
+          <div className="sb-avatar">{userInitials}</div>
+          <div className="sb-user-info">
+            <span className="nm">{userName}</span>
+            <span className="ml">{userEmail}</span>
+          </div>
+        </Link>
         <button
           type="button"
           className="icon-btn"
