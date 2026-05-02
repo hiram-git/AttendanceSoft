@@ -2,7 +2,13 @@ import { Elysia, t } from 'elysia'
 import { cors } from '@elysiajs/cors'
 import { and, eq, gte, lte } from 'drizzle-orm'
 import { db } from '../db/index.ts'
-import { staff, services, clients, appointments } from '../db/schema.ts'
+import {
+  staff,
+  staffAvailability,
+  services,
+  clients,
+  appointments,
+} from '../db/schema.ts'
 import { auth } from './auth.ts'
 import { describeConflicts, findConflicts } from './conflicts.ts'
 
@@ -95,6 +101,40 @@ export const api = new Elysia()
           await db.delete(staff).where(eq(staff.id, params.id))
           return { ok: true }
         })
+
+        // ───── Staff availability ─────
+        .get('/api/staff/:id/availability', ({ params }) =>
+          db
+            .select()
+            .from(staffAvailability)
+            .where(eq(staffAvailability.staffId, params.id)),
+        )
+        .put(
+          '/api/staff/:id/availability',
+          async ({ params, body }) => {
+            await db
+              .delete(staffAvailability)
+              .where(eq(staffAvailability.staffId, params.id))
+            if (body.length > 0) {
+              await db
+                .insert(staffAvailability)
+                .values(body.map((b) => ({ ...b, staffId: params.id })))
+            }
+            return db
+              .select()
+              .from(staffAvailability)
+              .where(eq(staffAvailability.staffId, params.id))
+          },
+          {
+            body: t.Array(
+              t.Object({
+                weekday: t.Integer({ minimum: 0, maximum: 6 }),
+                startTime: t.String(),
+                endTime: t.String(),
+              }),
+            ),
+          },
+        )
 
         // ───── Services ─────
         .get('/api/services', () => db.select().from(services))

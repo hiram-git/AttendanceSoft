@@ -1,4 +1,10 @@
-import type { Staff, Service, Client, Appointment } from '../db/schema.ts'
+import type {
+  Staff,
+  StaffAvailability,
+  Service,
+  Client,
+  Appointment,
+} from '../db/schema.ts'
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
@@ -62,6 +68,18 @@ export const api = {
   updateStaff: (id: string, b: Partial<StaffInput>) =>
     http<Staff>(`/api/staff/${id}`, json('PATCH', b)),
   deleteStaff: (id: string) => http<{ ok: true }>(`/api/staff/${id}`, del()),
+
+  // Staff availability (one row per weekday × staff)
+  staffAvailability: (id: string) =>
+    http<Array<StaffAvailability>>(`/api/staff/${id}/availability`),
+  setStaffAvailability: (
+    id: string,
+    rows: Array<{ weekday: number; startTime: string; endTime: string }>,
+  ) =>
+    http<Array<StaffAvailability>>(`/api/staff/${id}/availability`, {
+      method: 'PUT',
+      body: JSON.stringify(rows),
+    }),
 
   // Services
   services: () => http<Array<Service>>('/api/services'),

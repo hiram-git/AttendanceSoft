@@ -86,6 +86,21 @@ export const staff = pgTable('staff', {
   rooms: text().array().notNull().default([]),
 })
 
+/**
+ * Weekly availability per staff member. weekday is 0 (Mon) .. 6 (Sun).
+ * One row per (staffId, weekday). When no row exists for a day, that day
+ * is considered "off".
+ */
+export const staffAvailability = pgTable('staff_availability', {
+  id: uuid().primaryKey().defaultRandom(),
+  staffId: uuid('staff_id')
+    .notNull()
+    .references(() => staff.id, { onDelete: 'cascade' }),
+  weekday: integer().notNull(),
+  startTime: time('start_time').notNull(),
+  endTime: time('end_time').notNull(),
+})
+
 export const services = pgTable('services', {
   id: uuid().primaryKey().defaultRandom(),
   name: text().notNull(),
@@ -117,6 +132,7 @@ export const appointments = pgTable('appointments', {
 })
 
 export type Staff = typeof staff.$inferSelect
+export type StaffAvailability = typeof staffAvailability.$inferSelect
 export type Service = typeof services.$inferSelect
 export type Client = typeof clients.$inferSelect
 export type Appointment = typeof appointments.$inferSelect

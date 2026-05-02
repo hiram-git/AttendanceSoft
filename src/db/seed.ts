@@ -2,6 +2,7 @@ import 'dotenv/config'
 import { db } from './index.ts'
 import {
   staff,
+  staffAvailability,
   services,
   clients,
   appointments,
@@ -22,6 +23,7 @@ async function seed() {
   await db.delete(appointments)
   await db.delete(clients)
   await db.delete(services)
+  await db.delete(staffAvailability)
   await db.delete(staff)
   await db.delete(sessionTable)
   await db.delete(accountTable)
@@ -152,8 +154,25 @@ async function seed() {
   await db.insert(appointments).values(rows)
   const totalAppts = rows.length
 
+  // Default availability: Mon–Fri 09:00–18:00 for everyone, Sat 09:00–14:00.
+  // Sunday is left empty (= day off).
+  const availabilityRows: Array<{
+    staffId: string
+    weekday: number
+    startTime: string
+    endTime: string
+  }> = []
+  for (const s of insertedStaff) {
+    for (const wd of [0, 1, 2, 3, 4]) {
+      availabilityRows.push({ staffId: s.id, weekday: wd, startTime: '09:00', endTime: '18:00' })
+    }
+    availabilityRows.push({ staffId: s.id, weekday: 5, startTime: '09:00', endTime: '14:00' })
+  }
+  await db.insert(staffAvailability).values(availabilityRows)
+  const totalAvailability = availabilityRows.length
+
   console.log(
-    `Inserted ${insertedStaff.length} staff, ${insertedServices.length} services, ${insertedClients.length} clients, ${totalAppts} appointments, 1 demo user.`,
+    `Inserted ${insertedStaff.length} staff, ${insertedServices.length} services, ${insertedClients.length} clients, ${totalAppts} appointments, ${totalAvailability} availability rows, 1 demo user.`,
   )
   process.exit(0)
 }
