@@ -4,6 +4,7 @@ import type {
   Service,
   Client,
   Appointment,
+  User,
 } from '../db/schema.ts'
 
 const BASE =
@@ -113,4 +114,10 @@ export const api = {
     http<Appointment>(`/api/appointments/${id}`, json('PATCH', b)),
   deleteAppointment: (id: string) =>
     http<{ ok: true }>(`/api/appointments/${id}`, del()),
+
+  // ───── Portal (cliente) ─────
+  portalSignup: (b: { name: string; email: string; password: string; phone?: string }) =>
+    http<{ user: User; token: string }>('/api/portal/signup', json('POST', b)),
+  portalMe: () =>
+    http<{ user: User; client: Client | null }>('/api/portal/me'),
 }

@@ -8,6 +8,7 @@ import {
   services,
   clients,
   appointments,
+  user,
 } from '../db/schema.ts'
 import { auth } from './auth.ts'
 import { describeConflicts, findConflicts } from './conflicts.ts'
@@ -48,12 +49,104 @@ export const api = new Elysia()
   .get('/api/health', () => ({ ok: true }))
   .get('/api/me', ({ session }) => session ?? null)
 
+  // ───── Public portal endpoints (no auth) ─────
+  .post(
+    '/api/portal/signup',
+    async ({ body, set }) => {
+      // Reject duplicate emails up front so we don't create an orphan
+      // `clients` row when Better-Auth rejects the signup.
+      const existing = await db
+        .select()
+        .from(user)
+        .where(eq(user.email, body.email))
+      if (existing.length > 0) {
+        set.status = 409
+        return {
+          error: 'email_taken',
+          message: 'Ya existe una cuenta con ese correo.',
+        }
+      }
+
+      // Create the clients row first so we have an id to link.
+      const [clientRow] = await db
+        .insert(clients)
+        .values({
+          name: body.name,
+          email: body.email,
+          phone: body.phone ?? null,
+        })
+        .returning()
+
+      try {
+        const res = await auth.api.signUpEmail({
+          body: {
+            email: body.email,
+            password: body.password,
+            name: body.name,
+            role: 'client',
+            clientId: clientRow.id,
+          },
+          asResponse: true,
+        })
+        if (!res.ok) {
+          // Roll back orphan clients row if Better-Auth rejected.
+          await db.delete(clients).where(eq(clients.id, clientRow.id))
+        }
+        return res
+      } catch (e) {
+        await db.delete(clients).where(eq(clients.id, clientRow.id))
+        set.status = 500
+        return {
+          error: 'signup_failed',
+          message: e instanceof Error ? e.message : 'unknown',
+        }
+      }
+    },
+    {
+      body: t.Object({
+        name: t.String({ minLength: 2 }),
+        email: t.String({ format: 'email' }),
+        password: t.String({ minLength: 8 }),
+        phone: t.Optional(t.String()),
+      }),
+    },
+  )
+
+  // ───── Authenticated portal endpoints (role='client') ─────
   .guard(
     {
       beforeHandle: ({ session, set }) => {
         if (!session) {
           set.status = 401
           return { error: 'Unauthorized' }
+        }
+        if (session.user.role !== 'client') {
+          set.status = 403
+          return { error: 'Forbidden', message: 'Esta sección es solo para clientes.' }
+        }
+      },
+    },
+    (app) =>
+      app.get('/api/portal/me', async ({ session }) => {
+        const clientId = session?.user.clientId ?? null
+        const client = clientId
+          ? (await db.select().from(clients).where(eq(clients.id, clientId)))[0] ?? null
+          : null
+        return { user: session?.user, client }
+      }),
+  )
+
+  // ───── Staff backoffice endpoints (role='staff') ─────
+  .guard(
+    {
+      beforeHandle: ({ session, set }) => {
+        if (!session) {
+          set.status = 401
+          return { error: 'Unauthorized' }
+        }
+        if (session.user.role !== 'staff') {
+          set.status = 403
+          return { error: 'Forbidden', message: 'Esta sección es solo para personal.' }
         }
       },
     },
