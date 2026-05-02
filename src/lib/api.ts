@@ -120,6 +120,8 @@ export const api = {
     http<{ user: User; token: string }>('/api/portal/signup', json('POST', b)),
   portalMe: () =>
     http<{ user: User; client: Client | null }>('/api/portal/me'),
+  portalAppointments: () =>
+    http<Array<Appointment>>('/api/portal/appointments'),
 
   // Invitations (staff side)
   createClientInvitation: (clientId: string) =>

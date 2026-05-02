@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PortalRouteImport } from './routes/portal'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BackofficeRouteImport } from './routes/backoffice'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as BackofficeIndexRouteImport } from './routes/backoffice.index'
 import { Route as BackofficeStaffRouteImport } from './routes/backoffice.staff'
 import { Route as BackofficeSettingsRouteImport } from './routes/backoffice.settings'
@@ -32,6 +34,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -58,6 +65,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PortalIndexRoute = PortalIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PortalRoute,
 } as any)
 const BackofficeIndexRoute = BackofficeIndexRouteImport.update({
   id: '/',
@@ -101,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/portal': typeof PortalRouteWithChildren
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
@@ -110,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
   '/backoffice/': typeof BackofficeIndexRoute
+  '/portal/': typeof PortalIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +139,7 @@ export interface FileRoutesByTo {
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
   '/backoffice': typeof BackofficeIndexRoute
+  '/portal': typeof PortalIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,6 +148,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/portal': typeof PortalRouteWithChildren
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/backoffice/appointments': typeof BackofficeAppointmentsRoute
@@ -142,6 +158,7 @@ export interface FileRoutesById {
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
   '/backoffice/': typeof BackofficeIndexRoute
+  '/portal/': typeof PortalIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +168,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/portal'
     | '/profile'
     | '/reset-password'
     | '/backoffice/appointments'
@@ -160,6 +178,7 @@ export interface FileRouteTypes {
     | '/backoffice/settings'
     | '/backoffice/staff'
     | '/backoffice/'
+    | '/portal/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,6 +194,7 @@ export interface FileRouteTypes {
     | '/backoffice/settings'
     | '/backoffice/staff'
     | '/backoffice'
+    | '/portal'
   id:
     | '__root__'
     | '/'
@@ -182,6 +202,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/portal'
     | '/profile'
     | '/reset-password'
     | '/backoffice/appointments'
@@ -191,6 +212,7 @@ export interface FileRouteTypes {
     | '/backoffice/settings'
     | '/backoffice/staff'
     | '/backoffice/'
+    | '/portal/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -199,6 +221,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  PortalRoute: typeof PortalRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
@@ -217,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -253,6 +283,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/portal/': {
+      id: '/portal/'
+      path: '/'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof PortalIndexRouteImport
+      parentRoute: typeof PortalRoute
     }
     '/backoffice/': {
       id: '/backoffice/'
@@ -330,12 +367,24 @@ const BackofficeRouteWithChildren = BackofficeRoute._addFileChildren(
   BackofficeRouteChildren,
 )
 
+interface PortalRouteChildren {
+  PortalIndexRoute: typeof PortalIndexRoute
+}
+
+const PortalRouteChildren: PortalRouteChildren = {
+  PortalIndexRoute: PortalIndexRoute,
+}
+
+const PortalRouteWithChildren =
+  PortalRoute._addFileChildren(PortalRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BackofficeRoute: BackofficeRouteWithChildren,
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  PortalRoute: PortalRouteWithChildren,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }

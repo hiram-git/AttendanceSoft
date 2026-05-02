@@ -21,7 +21,7 @@ export function AppShell({
 }: Props) {
   const { appDark } = useTheme()
   return (
-    <RequireAuth>
+    <RequireAuth requiredRole="staff">
       <div
         className="app-shell"
         data-theme={appDark ? 'dark' : 'light'}

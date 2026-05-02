@@ -227,13 +227,28 @@ export const api = new Elysia()
       },
     },
     (app) =>
-      app.get('/api/portal/me', async ({ session }) => {
-        const clientId = session?.user.clientId ?? null
-        const client = clientId
-          ? (await db.select().from(clients).where(eq(clients.id, clientId)))[0] ?? null
-          : null
-        return { user: session?.user, client }
-      }),
+      app
+        .get('/api/portal/me', async ({ session }) => {
+          const clientId = session?.user.clientId ?? null
+          const client = clientId
+            ? (await db.select().from(clients).where(eq(clients.id, clientId)))[0] ?? null
+            : null
+          return { user: session?.user, client }
+        })
+        .get(
+          '/api/portal/appointments',
+          async ({ session, set }) => {
+            const clientId = session?.user.clientId
+            if (!clientId) {
+              set.status = 400
+              return { error: 'no_client', message: 'Tu cuenta no está vinculada a un cliente.' }
+            }
+            return db
+              .select()
+              .from(appointments)
+              .where(eq(appointments.clientId, clientId))
+          },
+        ),
   )
 
   // ───── Staff backoffice endpoints (role='staff') ─────

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useSession } from '../lib/auth-client.ts'
 
 const API_BASE =
@@ -8,14 +8,27 @@ const API_BASE =
   import.meta.env.VITE_API_URL ??
   'http://localhost:3001'
 
-export function RequireAuth({ children }: { children: ReactNode }) {
+type RoleFromSession = 'staff' | 'client' | string | null | undefined
+
+interface Props {
+  children: ReactNode
+  /**
+   * If set, the session.user.role must match exactly. Otherwise the
+   * authenticated user gets a "wrong area" card with a link to the
+   * area that does fit their role.
+   */
+  requiredRole?: 'staff' | 'client'
+}
+
+export function RequireAuth({ children, requiredRole }: Props) {
   const { data: session, isPending, error } = useSession()
   const navigate = useNavigate()
 
+  const role: RoleFromSession =
+    (session?.user as { role?: string } | undefined)?.role
+
   useEffect(() => {
     // Only redirect when we got a clean answer with no session.
-    // If there was an error talking to the API we want to surface it
-    // instead of bouncing the user to /login (which would also fail).
     if (!isPending && !session && !error) {
       navigate({ to: '/login' })
     }
@@ -59,6 +72,31 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   }
 
   if (!session) return null
+
+  if (requiredRole && role !== requiredRole) {
+    const target = role === 'staff' ? '/dashboard' : '/portal'
+    const label = role === 'staff' ? 'el panel del operador' : 'tu portal'
+    return (
+      <div className="auth-fallback" role="alert">
+        <div className="auth-fallback-card">
+          <div className="auth-fallback-tag">SECCIÓN INCORRECTA</div>
+          <h2>Esta área no es para tu cuenta.</h2>
+          <p>
+            Estás autenticado como{' '}
+            <strong style={{ color: 'var(--app-heading)' }}>{role ?? 'desconocido'}</strong>
+            {', '}pero esta sección requiere{' '}
+            <strong style={{ color: 'var(--app-heading)' }}>{requiredRole}</strong>.
+          </p>
+          <p className="auth-fallback-hint">
+            Te llevamos a {label}.
+          </p>
+          <Link to={target} className="btn-grad" style={{ alignSelf: 'flex-start' }}>
+            Ir a {target}
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return <>{children}</>
 }
