@@ -7,9 +7,11 @@ import {
   staffAvailability,
   services,
   clients,
+  clientInvitations,
   appointments,
   user,
 } from '../db/schema.ts'
+import { randomBytes } from 'node:crypto'
 import { auth } from './auth.ts'
 import { describeConflicts, findConflicts } from './conflicts.ts'
 
@@ -34,6 +36,12 @@ const STATUS = t.Union([
 
 const webOrigin = process.env.WEB_URL ?? 'http://localhost:3000'
 
+const INVITATION_TTL_DAYS = 7
+
+function generateInvitationToken() {
+  return randomBytes(24).toString('base64url')
+}
+
 export const api = new Elysia()
   .use(
     cors({
@@ -50,6 +58,98 @@ export const api = new Elysia()
   .get('/api/me', ({ session }) => session ?? null)
 
   // ───── Public portal endpoints (no auth) ─────
+
+  // Read-only lookup of an invitation by token. Used by the portal
+  // invite landing page to prefill the client's name + email and
+  // show "expired" / "already used" states.
+  .get(
+    '/api/portal/invitations/:token',
+    async ({ params, set }) => {
+      const rows = await db
+        .select({ inv: clientInvitations, client: clients })
+        .from(clientInvitations)
+        .innerJoin(clients, eq(clientInvitations.clientId, clients.id))
+        .where(eq(clientInvitations.token, params.token))
+      if (rows.length === 0) {
+        set.status = 404
+        return { error: 'not_found' }
+      }
+      const { inv, client } = rows[0]
+      const now = new Date()
+      let state: 'pending' | 'expired' | 'used' = 'pending'
+      if (inv.usedAt) state = 'used'
+      else if (inv.expiresAt < now) state = 'expired'
+      return {
+        state,
+        client: { id: client.id, name: client.name, email: client.email },
+        expiresAt: inv.expiresAt.toISOString(),
+      }
+    },
+  )
+
+  .post(
+    '/api/portal/accept-invite',
+    async ({ body, set }) => {
+      const rows = await db
+        .select({ inv: clientInvitations, client: clients })
+        .from(clientInvitations)
+        .innerJoin(clients, eq(clientInvitations.clientId, clients.id))
+        .where(eq(clientInvitations.token, body.token))
+      if (rows.length === 0) {
+        set.status = 404
+        return { error: 'not_found', message: 'Invitación no encontrada.' }
+      }
+      const { inv, client } = rows[0]
+      if (inv.usedAt) {
+        set.status = 410
+        return { error: 'already_used', message: 'Esta invitación ya fue usada.' }
+      }
+      if (inv.expiresAt < new Date()) {
+        set.status = 410
+        return { error: 'expired', message: 'Esta invitación expiró.' }
+      }
+
+      const email = client.email
+      if (!email) {
+        set.status = 400
+        return { error: 'no_email', message: 'El cliente no tiene email registrado.' }
+      }
+
+      // Refuse if the client already has a portal user (someone accepted
+      // a previous invitation for the same client_id).
+      const existing = await db.select().from(user).where(eq(user.clientId, client.id))
+      if (existing.length > 0) {
+        set.status = 409
+        return { error: 'already_linked', message: 'Este cliente ya tiene cuenta.' }
+      }
+
+      const res = await auth.api.signUpEmail({
+        body: {
+          email,
+          password: body.password,
+          name: client.name,
+          role: 'client',
+          clientId: client.id,
+        },
+        asResponse: true,
+      })
+
+      if (res.ok) {
+        await db
+          .update(clientInvitations)
+          .set({ usedAt: new Date() })
+          .where(eq(clientInvitations.id, inv.id))
+      }
+      return res
+    },
+    {
+      body: t.Object({
+        token: t.String(),
+        password: t.String({ minLength: 8 }),
+      }),
+    },
+  )
+
   .post(
     '/api/portal/signup',
     async ({ body, set }) => {
@@ -311,6 +411,51 @@ export const api = new Elysia()
         .delete('/api/clients/:id', async ({ params }) => {
           await db.delete(clients).where(eq(clients.id, params.id))
           return { ok: true }
+        })
+
+        // Create a portal invitation for a client. Returns the URL the
+        // operator should send (until a real mailer is wired up, the
+        // operator copies this from the UI and shares it manually).
+        .post('/api/clients/:id/invitations', async ({ params, set }) => {
+          const found = await db.select().from(clients).where(eq(clients.id, params.id))
+          if (found.length === 0) {
+            set.status = 404
+            return { error: 'not_found' }
+          }
+          const client = found[0]
+          if (!client.email) {
+            set.status = 400
+            return {
+              error: 'no_email',
+              message: 'El cliente no tiene email registrado. Edítalo antes de invitar.',
+            }
+          }
+          // If the client already has a portal user, generating new
+          // invitations is meaningless.
+          const existingUser = await db
+            .select()
+            .from(user)
+            .where(eq(user.clientId, client.id))
+          if (existingUser.length > 0) {
+            set.status = 409
+            return { error: 'already_linked', message: 'Este cliente ya tiene cuenta.' }
+          }
+
+          const token = generateInvitationToken()
+          const expiresAt = new Date(
+            Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000,
+          )
+          const [inv] = await db
+            .insert(clientInvitations)
+            .values({ clientId: client.id, token, expiresAt })
+            .returning()
+
+          return {
+            id: inv.id,
+            token,
+            expiresAt: inv.expiresAt.toISOString(),
+            url: `${webOrigin}/portal/invite/${token}`,
+          }
         })
 
         // ───── Appointments ─────

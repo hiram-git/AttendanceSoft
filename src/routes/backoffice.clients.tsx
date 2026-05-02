@@ -9,6 +9,7 @@ import { DataTable } from '../components/DataTable.tsx'
 import { Modal } from '../components/Modal.tsx'
 import { ConfirmDialog } from '../components/ConfirmDialog.tsx'
 import { EmptyState } from '../components/EmptyState.tsx'
+import { InvitationDialog } from '../components/InvitationDialog.tsx'
 import { NavIcon } from '../components/icons.tsx'
 import { api } from '../lib/api.ts'
 import { useToast } from '../lib/useToast.ts'
@@ -164,6 +165,7 @@ function ClientsPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Client | null>(null)
   const [deleting, setDeleting] = useState<Client | null>(null)
+  const [inviting, setInviting] = useState<Client | null>(null)
 
   const clientsQuery = useQuery({
     queryKey: ['clients'],
@@ -222,6 +224,16 @@ function ClientsPage() {
       enableSorting: false,
       cell: ({ row }) => (
         <div className="row-actions">
+          <button
+            type="button"
+            className="icon-btn tone-success"
+            title="Invitar al portal"
+            aria-label="Invitar al portal"
+            onClick={() => setInviting(row.original)}
+            disabled={!row.original.email}
+          >
+            {NavIcon.send}
+          </button>
           <button
             type="button"
             className="icon-btn tone-accent"
@@ -340,6 +352,12 @@ function ClientsPage() {
           if (deleting) await deleteMut.mutateAsync(deleting.id)
           setDeleting(null)
         }}
+      />
+
+      <InvitationDialog
+        client={inviting}
+        open={inviting !== null}
+        onOpenChange={(o) => { if (!o) setInviting(null) }}
       />
     </AppShell>
   )

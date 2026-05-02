@@ -120,4 +120,21 @@ export const api = {
     http<{ user: User; token: string }>('/api/portal/signup', json('POST', b)),
   portalMe: () =>
     http<{ user: User; client: Client | null }>('/api/portal/me'),
+
+  // Invitations (staff side)
+  createClientInvitation: (clientId: string) =>
+    http<{ id: string; token: string; expiresAt: string; url: string }>(
+      `/api/clients/${clientId}/invitations`,
+      json('POST', {}),
+    ),
+
+  // Invitations (client side, public)
+  getInvitation: (token: string) =>
+    http<{
+      state: 'pending' | 'expired' | 'used'
+      client: { id: string; name: string; email: string | null }
+      expiresAt: string
+    }>(`/api/portal/invitations/${token}`),
+  acceptInvite: (b: { token: string; password: string }) =>
+    http<{ user: User; token: string }>('/api/portal/accept-invite', json('POST', b)),
 }
