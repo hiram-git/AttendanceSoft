@@ -8,7 +8,7 @@ const SECTIONS = [
     items: [
       { id: 'home', label: 'Inicio', icon: NavIcon.home, to: '/dashboard' },
       { id: 'cal', label: 'Agenda', icon: NavIcon.cal, to: '/dashboard', badge: 12 },
-      { id: 'ppl', label: 'Clientes', icon: NavIcon.ppl, to: '/dashboard' },
+      { id: 'ppl', label: 'Clientes', icon: NavIcon.ppl, to: '/backoffice/clients' },
       { id: 'svc', label: 'Servicios', icon: NavIcon.svc, to: '/dashboard' },
     ],
   },
