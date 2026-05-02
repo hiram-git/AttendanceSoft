@@ -286,3 +286,210 @@
   .land-cta { padding: 80px 20px; }
   .land-footer { flex-direction: column; gap: 16px; padding: 32px 20px; }
 }
+
+/* ───── Customers ───── */
+.land-logos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--land-line);
+  border: 1px solid var(--land-line);
+  margin-bottom: 80px;
+}
+.land-logo {
+  background: var(--land-bg);
+  padding: 28px 16px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.18em;
+  color: var(--land-fg-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.land-cases {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--land-line);
+}
+.land-case {
+  padding: 40px 32px 48px;
+  border-right: 1px solid var(--land-line);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.land-case:last-child { border-right: none; }
+.land-case-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.18em;
+  color: var(--land-fg-3);
+}
+.land-case-num { color: var(--land-fg-3); }
+.land-case-tag { color: var(--land-fg-2); }
+.land-case-title {
+  font-size: 24px; font-weight: 300; line-height: 1.15; letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--land-fg);
+}
+.land-case-body {
+  margin: 0;
+  color: var(--land-fg-2);
+  font-size: 15px; line-height: 1.55; max-width: 36ch;
+}
+.land-case-meta {
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.16em;
+  color: var(--land-fg-3);
+}
+
+/* ───── Pricing ───── */
+.land-pricing {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--land-line);
+}
+.land-tier {
+  padding: 44px 32px 40px;
+  border-right: 1px solid var(--land-line);
+  display: flex; flex-direction: column; gap: 16px;
+  position: relative;
+}
+.land-tier:last-child { border-right: none; }
+.land-tier.featured::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0;
+  height: 2px;
+  background: var(--land-accent);
+}
+.land-tier-head {
+  display: flex; align-items: baseline; gap: 16px;
+}
+.land-tier-num {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.18em;
+  color: var(--land-fg-3);
+}
+.land-tier-name {
+  font-size: 16px; font-weight: 500; letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--land-fg);
+}
+.land-tier-price {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-top: 4px;
+}
+.land-tier-price .amount {
+  font-size: 56px; font-weight: 300;
+  letter-spacing: -0.035em; line-height: 1;
+  font-feature-settings: "tnum";
+  color: var(--land-fg);
+}
+.land-tier-price .currency {
+  font-family: var(--font-mono);
+  font-size: 12px; letter-spacing: 0.14em;
+  color: var(--land-fg-3);
+  text-transform: uppercase;
+}
+.land-tier-cadence {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--land-fg-3);
+}
+.land-tier-pitch {
+  margin: 8px 0 0;
+  font-size: 14.5px; line-height: 1.55;
+  color: var(--land-fg-2);
+  max-width: 32ch;
+}
+.land-tier-features {
+  list-style: none; padding: 0; margin: 16px 0 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  font-size: 13.5px; color: var(--land-fg-2);
+  border-top: 1px solid var(--land-line);
+  padding-top: 24px;
+}
+.land-tier-features li {
+  display: flex; align-items: center; gap: 10px;
+}
+.land-tier-features li svg {
+  color: var(--land-accent);
+  flex: 0 0 auto;
+}
+.land-tier .btn-min { align-self: flex-start; margin-top: auto; }
+.land-tier.featured .btn-min { background: var(--land-accent); color: white; border-color: var(--land-accent); }
+
+.land-pricing-foot {
+  margin-top: 40px;
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--land-fg-3);
+  text-align: center;
+}
+
+/* ───── Company ───── */
+.land-company {
+  display: grid; grid-template-columns: 1.6fr 1fr; gap: 80px;
+  margin-bottom: 80px;
+  padding-bottom: 80px;
+  border-bottom: 1px solid var(--land-line);
+}
+.land-company-copy p {
+  margin: 0 0 16px;
+  font-size: 17px; line-height: 1.6; font-weight: 300;
+  color: var(--land-fg-2);
+  max-width: 56ch;
+}
+.land-company-copy p:last-child { margin-bottom: 0; }
+
+.land-company-stats {
+  display: flex; flex-direction: column; gap: 28px;
+  border-left: 1px solid var(--land-line);
+  padding-left: 32px;
+}
+.land-company-stat-num {
+  font-size: 44px; font-weight: 300; letter-spacing: -0.03em; line-height: 1;
+  font-feature-settings: "tnum";
+  color: var(--land-fg);
+}
+.land-company-stat-lbl {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.18em;
+  color: var(--land-fg-3);
+}
+
+.land-values {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+}
+.land-value {
+  padding: 40px 32px 8px;
+  border-right: 1px solid var(--land-line);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.land-value:last-child { border-right: none; }
+.land-value-num {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.18em;
+  color: var(--land-fg-3);
+}
+.land-value-title {
+  font-size: 22px; font-weight: 300; letter-spacing: -0.02em; line-height: 1.1;
+  margin: 0; color: var(--land-fg);
+}
+.land-value-body {
+  margin: 0;
+  color: var(--land-fg-2); font-size: 14.5px; line-height: 1.55;
+  max-width: 32ch;
+}
+
+/* ───── Mobile overrides for new sections ───── */
+@media (max-width: 900px) {
+  .land-logos { grid-template-columns: repeat(2, 1fr); margin-bottom: 48px; }
+  .land-cases { grid-template-columns: 1fr; }
+  .land-case { border-right: none; border-bottom: 1px solid var(--land-line); }
+  .land-pricing { grid-template-columns: 1fr; }
+  .land-tier { border-right: none; border-bottom: 1px solid var(--land-line); }
+  .land-pricing-foot { margin-top: 28px; padding: 0 8px; line-height: 1.6; }
+  .land-company { grid-template-columns: 1fr; gap: 32px; padding-bottom: 48px; margin-bottom: 48px; }
+  .land-company-stats { border-left: none; border-top: 1px solid var(--land-line); padding-left: 0; padding-top: 28px; flex-direction: row; gap: 24px; flex-wrap: wrap; }
+  .land-values { grid-template-columns: 1fr; }
+  .land-value { border-right: none; border-bottom: 1px solid var(--land-line); }
+}

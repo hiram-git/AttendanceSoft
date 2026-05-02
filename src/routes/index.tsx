@@ -162,6 +162,243 @@ function CTA() {
   )
 }
 
+function Customers() {
+  const logos = [
+    'CLÍNICA VÉRTICE',
+    'STUDIO NORTE',
+    'GIMNASIO ARENA',
+    'NOTARÍA 14',
+    'ESTÉTICA AURA',
+    'TALLER NÚCLEO',
+    'CONSULTORIO IRIS',
+    'ATELIER VOL.',
+  ]
+  const cases = [
+    {
+      n: '01',
+      tag: 'Clínica',
+      title: 'De agendas en papel a tablero único.',
+      body: 'Clínica Vértice migró 12 consultorios a una sola operación; redujo 32% las ausencias en el primer mes.',
+      meta: '12 CONSULTORIOS · 4,800 CITAS/MES',
+    },
+    {
+      n: '02',
+      tag: 'Estudio',
+      title: 'Reservas que llegan solas.',
+      body: 'Studio Norte abrió un canal público de reservas y movió 71% de las citas a self-service sin sumar personal.',
+      meta: '3 SEDES · 2,100 CITAS/MES',
+    },
+    {
+      n: '03',
+      tag: 'Servicios',
+      title: 'Sin conflictos de sala, nunca más.',
+      body: 'Taller Núcleo eliminó las dobles asignaciones de bahías con reglas de disponibilidad por recurso.',
+      meta: '6 BAHÍAS · 38 TÉCNICOS',
+    },
+  ]
+  return (
+    <section className="land-section" id="clientes">
+      <div className="land-section-head">
+        <div className="land-eyebrow">— Clientes</div>
+        <h2 className="land-h2">
+          Equipos de toda forma y tamaño <em>operan en silencio</em> con AttendanceSoft.
+        </h2>
+      </div>
+
+      <div className="land-logos">
+        {logos.map((l) => (
+          <div className="land-logo" key={l}>{l}</div>
+        ))}
+      </div>
+
+      <div className="land-cases">
+        {cases.map((c) => (
+          <article className="land-case" key={c.n}>
+            <div className="land-case-head">
+              <span className="land-case-num">{c.n}</span>
+              <span className="land-case-tag">{c.tag}</span>
+            </div>
+            <h3 className="land-case-title">{c.title}</h3>
+            <p className="land-case-body">{c.body}</p>
+            <div className="land-case-meta">{c.meta}</div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function Pricing() {
+  const tiers = [
+    {
+      n: '01',
+      name: 'Solo',
+      price: '0',
+      currency: 'MXN',
+      cadence: 'siempre gratis',
+      pitch: 'Para una persona. Empieza sin tarjeta.',
+      features: [
+        'Hasta 50 citas / mes',
+        '1 calendario',
+        'Página pública de reservas',
+        'Recordatorios por correo',
+      ],
+      cta: 'Empezar gratis',
+      ctaHref: '#trial',
+    },
+    {
+      n: '02',
+      name: 'Equipo',
+      price: '1,290',
+      currency: 'MXN',
+      cadence: 'por usuario / mes',
+      featured: true,
+      pitch: 'Para equipos que viven en la agenda.',
+      features: [
+        'Citas ilimitadas',
+        'Calendarios por persona y por sala',
+        'Reglas de disponibilidad y conflictos',
+        'Reportes y exportación',
+        'Soporte prioritario',
+      ],
+      cta: 'Probar 14 días',
+      ctaHref: '#trial',
+    },
+    {
+      n: '03',
+      name: 'Empresa',
+      price: 'Hablemos',
+      currency: '',
+      cadence: 'plan a medida',
+      pitch: 'Para operaciones grandes con compliance.',
+      features: [
+        'SSO (SAML / OIDC)',
+        'SLA y soporte dedicado',
+        'Implementación guiada',
+        'Auditoría y residencia de datos',
+      ],
+      cta: 'Contactar a ventas',
+      ctaHref: '#sales',
+    },
+  ]
+  return (
+    <section className="land-section" id="precios">
+      <div className="land-section-head">
+        <div className="land-eyebrow">— Precios</div>
+        <h2 className="land-h2">
+          Tres planes. <em>Cero sorpresas.</em> Sin tarjeta para empezar.
+        </h2>
+      </div>
+
+      <div className="land-pricing">
+        {tiers.map((t) => (
+          <article className={'land-tier' + (t.featured ? ' featured' : '')} key={t.n}>
+            <div className="land-tier-head">
+              <span className="land-tier-num">{t.n}</span>
+              <span className="land-tier-name">{t.name}</span>
+            </div>
+            <div className="land-tier-price">
+              <span className="amount">{t.price}</span>
+              {t.currency && <span className="currency">{t.currency}</span>}
+            </div>
+            <div className="land-tier-cadence">{t.cadence}</div>
+            <p className="land-tier-pitch">{t.pitch}</p>
+            <ul className="land-tier-features">
+              {t.features.map((f) => (
+                <li key={f}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <a className={'btn-min ' + (t.featured ? '' : 'ghost')} href={t.ctaHref}>
+              {t.cta}
+            </a>
+          </article>
+        ))}
+      </div>
+
+      <div className="land-pricing-foot">
+        Todos los planes incluyen actualizaciones, exportación de datos y backups diarios.
+        Sin costo de implementación.
+      </div>
+    </section>
+  )
+}
+
+function Company() {
+  const values = [
+    {
+      n: '01',
+      title: 'Sustracción.',
+      body: 'Un producto fuerte se reconoce por lo que decide no hacer. Cada feature compite contra el silencio.',
+    },
+    {
+      n: '02',
+      title: 'Operación.',
+      body: 'Diseñamos para el equipo que vive en la agenda, no para el que la inspecciona dos veces al mes.',
+    },
+    {
+      n: '03',
+      title: 'Honestidad.',
+      body: 'Un precio claro, un dato exportable, un correo del CEO. Nada que esconder en letra chica.',
+    },
+  ]
+  return (
+    <section className="land-section" id="empresa">
+      <div className="land-section-head">
+        <div className="land-eyebrow">— Empresa</div>
+        <h2 className="land-h2">
+          Construimos software para que <em>tu día empiece silencioso.</em>
+        </h2>
+      </div>
+
+      <div className="land-company">
+        <div className="land-company-copy">
+          <p>
+            AttendanceSoft nació en CDMX en 2024, dentro de una clínica que perdía
+            tres horas al día sincronizando calendarios. Hoy es la plataforma de
+            agendamiento que prefieren equipos pequeños y operaciones grandes que
+            buscan claridad antes que ruido.
+          </p>
+          <p>
+            Somos un equipo distribuido de 14 personas. Cobramos por uso real,
+            cifrramos los datos en reposo y publicamos cada cambio en un changelog
+            abierto. Si el producto no resuelve algo, lo decimos antes de venderlo.
+          </p>
+        </div>
+
+        <div className="land-company-stats">
+          <div>
+            <div className="land-company-stat-num">2024</div>
+            <div className="land-company-stat-lbl">FUNDADA · CDMX</div>
+          </div>
+          <div>
+            <div className="land-company-stat-num">14</div>
+            <div className="land-company-stat-lbl">PERSONAS</div>
+          </div>
+          <div>
+            <div className="land-company-stat-num">312</div>
+            <div className="land-company-stat-lbl">EQUIPOS ACTIVOS</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="land-values">
+        {values.map((v) => (
+          <div className="land-value" key={v.n}>
+            <div className="land-value-num">{v.n}</div>
+            <h3 className="land-value-title">{v.title}</h3>
+            <p className="land-value-body">{v.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function Footer() {
   return (
     <footer className="land-footer">
@@ -185,8 +422,11 @@ function LandingPage() {
       <Hero />
       <Pillars />
       <Showcase />
+      <Customers />
       <Stats />
       <Quote />
+      <Pricing />
+      <Company />
       <CTA />
       <Footer />
     </div>
