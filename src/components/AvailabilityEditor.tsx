@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Modal } from './Modal.tsx'
 import { api } from '../lib/api.ts'
+import { useToast } from '../lib/useToast.ts'
 import type { Staff } from '../db/schema.ts'
 
 interface Props {
@@ -30,6 +31,7 @@ function trimSeconds(t: string) {
 
 export function AvailabilityEditor({ staff, open, onOpenChange }: Props) {
   const qc = useQueryClient()
+  const toast = useToast()
   const [week, setWeek] = useState<Array<DayState>>(EMPTY_WEEK)
   const [error, setError] = useState<string | null>(null)
 
@@ -46,6 +48,7 @@ export function AvailabilityEditor({ staff, open, onOpenChange }: Props) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['staff-availability', staff?.id] })
+      toast.success('Disponibilidad actualizada', staff?.name)
     },
   })
 

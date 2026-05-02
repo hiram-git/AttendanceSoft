@@ -12,6 +12,7 @@ import { EmptyState } from '../components/EmptyState.tsx'
 import { AvailabilityEditor } from '../components/AvailabilityEditor.tsx'
 import { NavIcon } from '../components/icons.tsx'
 import { api } from '../lib/api.ts'
+import { useToast } from '../lib/useToast.ts'
 import type { Staff } from '../db/schema.ts'
 
 export const Route = createFileRoute('/backoffice/staff')({ component: StaffPage })
@@ -219,6 +220,7 @@ function StaffForm({ initial, onSubmit, onCancel, submitLabel }: StaffFormProps)
 
 function StaffPage() {
   const qc = useQueryClient()
+  const toast = useToast()
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Staff | null>(null)
@@ -229,16 +231,25 @@ function StaffPage() {
 
   const createMut = useMutation({
     mutationFn: api.createStaff,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ['staff'] })
+      toast.success('Persona agregada', row.name)
+    },
   })
   const updateMut = useMutation({
     mutationFn: ({ id, body }: { id: string; body: Parameters<typeof api.updateStaff>[1] }) =>
       api.updateStaff(id, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ['staff'] })
+      toast.success('Persona actualizada', row.name)
+    },
   })
   const deleteMut = useMutation({
     mutationFn: api.deleteStaff,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['staff'] })
+      toast.success('Persona eliminada')
+    },
   })
 
   const columns = useMemo<Array<ColumnDef<Staff>>>(() => [

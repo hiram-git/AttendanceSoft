@@ -12,6 +12,7 @@ import { EmptyState } from '../components/EmptyState.tsx'
 import { NewAppointmentDialog } from '../components/NewAppointmentDialog.tsx'
 import { NavIcon } from '../components/icons.tsx'
 import { api } from '../lib/api.ts'
+import { useToast } from '../lib/useToast.ts'
 import type { Appointment, Staff } from '../db/schema.ts'
 
 export const Route = createFileRoute('/backoffice/appointments')({ component: AppointmentsPage })
@@ -214,6 +215,7 @@ function EditAppointmentForm({ appt, onSubmit, onCancel }: EditAppointmentFormPr
 
 function AppointmentsPage() {
   const qc = useQueryClient()
+  const toast = useToast()
   const today = new Date().toISOString().slice(0, 10)
   const [from, setFrom] = useState('2026-05-01')
   const [to, setTo] = useState('2026-05-31')
@@ -233,11 +235,20 @@ function AppointmentsPage() {
   const updateMut = useMutation({
     mutationFn: ({ id, body }: { id: string; body: Parameters<typeof api.updateAppointment>[1] }) =>
       api.updateAppointment(id, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['appointments'] }),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ['appointments'] })
+      toast.success('Cita actualizada', row.label)
+    },
+    onError: (e) => {
+      toast.error('No pudimos actualizar', e instanceof Error ? e.message : undefined)
+    },
   })
   const deleteMut = useMutation({
     mutationFn: api.deleteAppointment,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['appointments'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['appointments'] })
+      toast.success('Cita eliminada')
+    },
   })
 
   const staffById = useMemo(() => {

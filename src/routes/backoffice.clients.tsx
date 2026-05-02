@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog.tsx'
 import { EmptyState } from '../components/EmptyState.tsx'
 import { NavIcon } from '../components/icons.tsx'
 import { api } from '../lib/api.ts'
+import { useToast } from '../lib/useToast.ts'
 import type { Client } from '../db/schema.ts'
 
 export const Route = createFileRoute('/backoffice/clients')({ component: ClientsPage })
@@ -158,6 +159,7 @@ function ClientForm({ initial, onSubmit, onCancel, submitLabel }: ClientFormProp
 
 function ClientsPage() {
   const qc = useQueryClient()
+  const toast = useToast()
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Client | null>(null)
@@ -170,16 +172,25 @@ function ClientsPage() {
 
   const createMut = useMutation({
     mutationFn: api.createClient,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ['clients'] })
+      toast.success('Cliente creado', row.name)
+    },
   })
   const updateMut = useMutation({
     mutationFn: ({ id, body }: { id: string; body: Parameters<typeof api.updateClient>[1] }) =>
       api.updateClient(id, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ['clients'] })
+      toast.success('Cliente actualizado', row.name)
+    },
   })
   const deleteMut = useMutation({
     mutationFn: api.deleteClient,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] })
+      toast.success('Cliente eliminado')
+    },
   })
 
   const columns = useMemo<Array<ColumnDef<Client>>>(() => [

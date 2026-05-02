@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog.tsx'
 import { EmptyState } from '../components/EmptyState.tsx'
 import { NavIcon } from '../components/icons.tsx'
 import { api } from '../lib/api.ts'
+import { useToast } from '../lib/useToast.ts'
 import type { Service } from '../db/schema.ts'
 
 export const Route = createFileRoute('/backoffice/services')({ component: ServicesPage })
@@ -164,6 +165,7 @@ function ServiceForm({ initial, onSubmit, onCancel, submitLabel }: ServiceFormPr
 
 function ServicesPage() {
   const qc = useQueryClient()
+  const toast = useToast()
   const [search, setSearch] = useState('')
   const [kindFilter, setKindFilter] = useState<Kind | 'all'>('all')
   const [createOpen, setCreateOpen] = useState(false)
@@ -174,16 +176,25 @@ function ServicesPage() {
 
   const createMut = useMutation({
     mutationFn: api.createService,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['services'] }),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ['services'] })
+      toast.success('Servicio creado', row.name)
+    },
   })
   const updateMut = useMutation({
     mutationFn: ({ id, body }: { id: string; body: Parameters<typeof api.updateService>[1] }) =>
       api.updateService(id, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['services'] }),
+    onSuccess: (row) => {
+      qc.invalidateQueries({ queryKey: ['services'] })
+      toast.success('Servicio actualizado', row.name)
+    },
   })
   const deleteMut = useMutation({
     mutationFn: api.deleteService,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['services'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['services'] })
+      toast.success('Servicio eliminado')
+    },
   })
 
   const data = useMemo(() => {

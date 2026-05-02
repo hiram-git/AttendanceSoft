@@ -9,6 +9,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { ThemeProvider } from '../lib/ThemeProvider.tsx'
+import { ToastProvider } from '../lib/ToastProvider.tsx'
 
 import appCss from '../styles.css?url'
 
@@ -49,7 +50,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider>{children ?? <Outlet />}</ThemeProvider>
+        <ThemeProvider>
+          <ToastProvider>{children ?? <Outlet />}</ToastProvider>
+        </ThemeProvider>
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
           plugins={[

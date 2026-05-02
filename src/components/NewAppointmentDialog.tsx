@@ -3,6 +3,7 @@ import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { api } from '../lib/api.ts'
+import { useToast } from '../lib/useToast.ts'
 import { NavIcon } from './icons.tsx'
 import { Modal } from './Modal.tsx'
 
@@ -26,6 +27,7 @@ interface Props {
 
 export function NewAppointmentDialog({ open, onOpenChange, defaultDate }: Props) {
   const qc = useQueryClient()
+  const toast = useToast()
   const [error, setError] = useState<string | null>(null)
 
   const staffQuery = useQuery({
@@ -46,8 +48,9 @@ export function NewAppointmentDialog({ open, onOpenChange, defaultDate }: Props)
 
   const create = useMutation({
     mutationFn: api.createAppointment,
-    onSuccess: () => {
+    onSuccess: (row) => {
       qc.invalidateQueries({ queryKey: ['appointments'] })
+      toast.success('Cita creada', `${row.startTime.slice(0, 5)} · ${row.label}`)
     },
   })
 
