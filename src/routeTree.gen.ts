@@ -19,6 +19,7 @@ import { Route as BackofficeRouteImport } from './routes/backoffice'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as BackofficeIndexRouteImport } from './routes/backoffice.index'
+import { Route as PortalBookRouteImport } from './routes/portal.book'
 import { Route as BackofficeStaffRouteImport } from './routes/backoffice.staff'
 import { Route as BackofficeSettingsRouteImport } from './routes/backoffice.settings'
 import { Route as BackofficeServicesRouteImport } from './routes/backoffice.services'
@@ -76,6 +77,11 @@ const BackofficeIndexRoute = BackofficeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => BackofficeRoute,
 } as any)
+const PortalBookRoute = PortalBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => PortalRoute,
+} as any)
 const BackofficeStaffRoute = BackofficeStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/backoffice/services': typeof BackofficeServicesRoute
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
+  '/portal/book': typeof PortalBookRoute
   '/backoffice/': typeof BackofficeIndexRoute
   '/portal/': typeof PortalIndexRoute
 }
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/backoffice/services': typeof BackofficeServicesRoute
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
+  '/portal/book': typeof PortalBookRoute
   '/backoffice': typeof BackofficeIndexRoute
   '/portal': typeof PortalIndexRoute
 }
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/backoffice/services': typeof BackofficeServicesRoute
   '/backoffice/settings': typeof BackofficeSettingsRoute
   '/backoffice/staff': typeof BackofficeStaffRoute
+  '/portal/book': typeof PortalBookRoute
   '/backoffice/': typeof BackofficeIndexRoute
   '/portal/': typeof PortalIndexRoute
 }
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/backoffice/services'
     | '/backoffice/settings'
     | '/backoffice/staff'
+    | '/portal/book'
     | '/backoffice/'
     | '/portal/'
   fileRoutesByTo: FileRoutesByTo
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/backoffice/services'
     | '/backoffice/settings'
     | '/backoffice/staff'
+    | '/portal/book'
     | '/backoffice'
     | '/portal'
   id:
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/backoffice/services'
     | '/backoffice/settings'
     | '/backoffice/staff'
+    | '/portal/book'
     | '/backoffice/'
     | '/portal/'
   fileRoutesById: FileRoutesById
@@ -298,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackofficeIndexRouteImport
       parentRoute: typeof BackofficeRoute
     }
+    '/portal/book': {
+      id: '/portal/book'
+      path: '/book'
+      fullPath: '/portal/book'
+      preLoaderRoute: typeof PortalBookRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/backoffice/staff': {
       id: '/backoffice/staff'
       path: '/staff'
@@ -368,10 +387,12 @@ const BackofficeRouteWithChildren = BackofficeRoute._addFileChildren(
 )
 
 interface PortalRouteChildren {
+  PortalBookRoute: typeof PortalBookRoute
   PortalIndexRoute: typeof PortalIndexRoute
 }
 
 const PortalRouteChildren: PortalRouteChildren = {
+  PortalBookRoute: PortalBookRoute,
   PortalIndexRoute: PortalIndexRoute,
 }
 

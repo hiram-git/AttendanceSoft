@@ -122,6 +122,23 @@ export const api = {
     http<{ user: User; client: Client | null }>('/api/portal/me'),
   portalAppointments: () =>
     http<Array<Appointment>>('/api/portal/appointments'),
+  portalServices: () => http<Array<Service>>('/api/portal/services'),
+  portalStaff: () =>
+    http<Array<Pick<Staff, 'id' | 'name' | 'role' | 'initials' | 'avatarGradient'>>>(
+      '/api/portal/staff',
+    ),
+  portalAvailability: (params: { staffId: string; date: string; durationMinutes: number }) => {
+    const qs = new URLSearchParams({
+      staffId: params.staffId,
+      date: params.date,
+      durationMinutes: String(params.durationMinutes),
+    })
+    return http<{ slots: Array<{ startTime: string; endTime: string }> }>(
+      `/api/portal/availability?${qs.toString()}`,
+    )
+  },
+  portalBook: (b: { serviceId: string; staffId: string; date: string; startTime: string }) =>
+    http<Appointment>('/api/portal/appointments', json('POST', b)),
 
   // Invitations (staff side)
   createClientInvitation: (clientId: string) =>

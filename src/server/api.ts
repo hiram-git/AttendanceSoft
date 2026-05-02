@@ -42,6 +42,27 @@ function generateInvitationToken() {
   return randomBytes(24).toString('base64url')
 }
 
+/** ISO date string (YYYY-MM-DD) → 0 (Mon) … 6 (Sun). */
+function mondayBased(iso: string) {
+  // Parse as local midnight to avoid TZ drift on the day-of-week.
+  const d = new Date(`${iso}T00:00:00`)
+  const sundayBased = d.getDay() // 0..6 with Sunday=0
+  return (sundayBased + 6) % 7
+}
+
+/** "HH:MM" or "HH:MM:SS" → minutes since midnight. */
+function toMinutes(time: string) {
+  const [h, m] = time.split(':')
+  return Number(h) * 60 + Number(m)
+}
+
+/** minutes since midnight → "HH:MM". */
+function fromMinutes(m: number) {
+  const h = Math.floor(m / 60)
+  const min = m % 60
+  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+}
+
 export const api = new Elysia()
   .use(
     cors({
@@ -247,6 +268,138 @@ export const api = new Elysia()
               .select()
               .from(appointments)
               .where(eq(appointments.clientId, clientId))
+          },
+        )
+
+        // Catalog the booking wizard needs.
+        .get('/api/portal/services', () => db.select().from(services))
+        .get('/api/portal/staff', () =>
+          db
+            .select({
+              id: staff.id,
+              name: staff.name,
+              role: staff.role,
+              initials: staff.initials,
+              avatarGradient: staff.avatarGradient,
+            })
+            .from(staff),
+        )
+
+        // Available slots on a given staff/date for a given duration.
+        // Slots step by duration so options never overlap each other.
+        .get(
+          '/api/portal/availability',
+          async ({ query }) => {
+            const dayOfWeek = mondayBased(query.date)
+            const rules = await db
+              .select()
+              .from(staffAvailability)
+              .where(
+                and(
+                  eq(staffAvailability.staffId, query.staffId),
+                  eq(staffAvailability.weekday, dayOfWeek),
+                ),
+              )
+            if (rules.length === 0) return { slots: [] as Array<{ startTime: string; endTime: string }> }
+            const rule = rules[0]
+            const taken = await db
+              .select({
+                startTime: appointments.startTime,
+                endTime: appointments.endTime,
+                status: appointments.status,
+              })
+              .from(appointments)
+              .where(
+                and(
+                  eq(appointments.staffId, query.staffId),
+                  eq(appointments.date, query.date),
+                ),
+              )
+
+            const busy = taken.filter((row) => row.status !== 'cancelada')
+            const slots: Array<{ startTime: string; endTime: string }> = []
+            const startMin = toMinutes(rule.startTime)
+            const endMin = toMinutes(rule.endTime)
+            for (let m = startMin; m + query.durationMinutes <= endMin; m += query.durationMinutes) {
+              const s = fromMinutes(m)
+              const e = fromMinutes(m + query.durationMinutes)
+              const overlaps = busy.some((b) =>
+                toMinutes(b.startTime) < m + query.durationMinutes &&
+                toMinutes(b.endTime) > m,
+              )
+              if (!overlaps) slots.push({ startTime: s, endTime: e })
+            }
+            return { slots }
+          },
+          {
+            query: t.Object({
+              staffId: t.String(),
+              date: t.String(),
+              durationMinutes: t.Numeric({ minimum: 5, maximum: 480 }),
+            }),
+          },
+        )
+
+        // Client books a slot. Server expands the service into kind +
+        // duration + label and runs the same conflict guard the
+        // backoffice POST /api/appointments uses.
+        .post(
+          '/api/portal/appointments',
+          async ({ body, session, set }) => {
+            const clientId = session?.user.clientId
+            if (!clientId) {
+              set.status = 400
+              return { error: 'no_client' }
+            }
+            const clientRows = await db.select().from(clients).where(eq(clients.id, clientId))
+            const serviceRows = await db.select().from(services).where(eq(services.id, body.serviceId))
+            if (serviceRows.length === 0) {
+              set.status = 404
+              return { error: 'service_not_found' }
+            }
+            const client = clientRows[0]
+            const service = serviceRows[0]
+            const startMin = toMinutes(body.startTime)
+            const endTime = fromMinutes(startMin + service.durationMinutes)
+
+            const conflicts = await findConflicts({
+              date: body.date,
+              startTime: body.startTime,
+              endTime,
+              staffId: body.staffId,
+            })
+            if (conflicts.length > 0) {
+              set.status = 409
+              return {
+                error: 'conflict',
+                message: describeConflicts(conflicts),
+                conflicts,
+              }
+            }
+
+            const [row] = await db
+              .insert(appointments)
+              .values({
+                date: body.date,
+                startTime: body.startTime,
+                endTime,
+                label: `${client.name} · ${service.name}`,
+                kind: service.kind,
+                status: 'confirmada',
+                staffId: body.staffId,
+                clientId,
+                serviceId: service.id,
+              })
+              .returning()
+            return row
+          },
+          {
+            body: t.Object({
+              serviceId: t.String(),
+              staffId: t.String(),
+              date: t.String(),
+              startTime: t.String(),
+            }),
           },
         ),
   )
