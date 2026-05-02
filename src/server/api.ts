@@ -31,10 +31,12 @@ const STATUS = t.Union([
   t.Literal('cancelada'),
 ])
 
+const webOrigin = process.env.WEB_URL ?? 'http://localhost:3000'
+
 export const api = new Elysia()
   .use(
     cors({
-      origin: ['http://localhost:3000'],
+      origin: [webOrigin],
       credentials: true,
     }),
   )

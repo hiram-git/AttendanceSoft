@@ -3,17 +3,24 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { db } from '../db/index.ts'
 import * as schema from '../db/schema.ts'
 
-const baseURL = process.env.BETTER_AUTH_URL ?? 'http://localhost:3001'
+// Public URL where this API is reachable. In prod Vercel/Cloudflare/Railway
+// expose this; locally it defaults to PORT-derived localhost.
+const apiURL =
+  process.env.PUBLIC_API_URL ??
+  `http://${process.env.HOST ?? 'localhost'}:${process.env.PORT ?? '3001'}`
+
 const webURL = process.env.WEB_URL ?? 'http://localhost:3000'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 export const auth = betterAuth({
-  baseURL,
+  baseURL: apiURL,
   basePath: '/api/auth',
-  secret: process.env.BETTER_AUTH_SECRET ?? 'dev-secret-change-me',
-  trustedOrigins: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-  ],
+  secret:
+    process.env.AUTH_SECRET ??
+    process.env.BETTER_AUTH_SECRET ??
+    'dev-secret-change-me',
+  trustedOrigins: [webURL, apiURL],
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
@@ -41,7 +48,7 @@ export const auth = betterAuth({
       session_token: {
         attributes: {
           sameSite: 'lax',
-          secure: false,
+          secure: isProd,
         },
       },
     },

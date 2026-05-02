@@ -39,26 +39,32 @@ drizzle.config.ts
 
 ## Setup local
 
-1. Instalar dependencias
+1. Copiar el archivo de variables y ajustarlo si hace falta
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Instalar dependencias
 
    ```bash
    bun install
    ```
 
-2. Levantar Postgres
+3. Levantar Postgres
 
    ```bash
    bun run db:up
    ```
 
-3. Crear schema y poblar con datos demo
+4. Crear schema y poblar con datos demo
 
    ```bash
    bun run db:push
    bun run db:seed
    ```
 
-4. Levantar web + API en paralelo
+5. Levantar web + API en paralelo
 
    ```bash
    bun run dev
@@ -142,3 +148,34 @@ Protegidas (requieren sesión):
 - `/backoffice/reports` — resumen del mes: totales, breakdown por tipo y carga por persona.
 - `/backoffice/settings` — placeholder.
 - `/profile` — datos de la cuenta (nombre) y cambio de contraseña.
+
+## Variables de entorno
+
+Toda la config se centraliza en `.env.example` (committeado). Para correr
+localmente, copialo a `.env.local` (gitignored).
+
+| Variable | Quién la usa | Notas |
+|---|---|---|
+| `DATABASE_URL` | API + Drizzle CLI | Conexión a Postgres. Requerida. |
+| `AUTH_SECRET` | API (Better-Auth) | Genera con `openssl rand -base64 32`. Requerida en prod. |
+| `NODE_ENV` | API | `production` activa cookies `Secure`. |
+| `PORT` | API | Puerto donde escucha Elysia (default `3001`). Vercel/Railway/Fly lo inyectan automáticamente. |
+| `HOST` | API | Hostname al que bindea Elysia. En contenedores/serverless usa `0.0.0.0`. |
+| `WEB_URL` | API | URL pública del frontend. Se usa para CORS y para construir el link de recuperación de contraseña. |
+| `PUBLIC_API_URL` | Web (cliente) | URL pública del API. Se inyecta en el bundle (prefijo `PUBLIC_*` o `VITE_*` configurado en `vite.config.ts`). |
+
+## Deploy
+
+El proyecto está partido en dos servicios para que cada uno pueda ir a una
+plataforma distinta:
+
+- **API (Elysia)** — corre con `bun run start:api`. Necesita `PORT`, `HOST`,
+  `DATABASE_URL`, `AUTH_SECRET`, `WEB_URL`, `NODE_ENV=production`.
+  Buena opción: Railway o Fly (Bun runtime + Postgres).
+- **Web (TanStack Start)** — `bun run build` produce `dist/`. Requiere
+  `PUBLIC_API_URL` apuntando al API público. Buena opción: Vercel o
+  Cloudflare Pages.
+
+Setea las variables desde el panel de la plataforma (no las commits).
+Después del primer deploy, corre `bun run db:push` y `bun run db:seed`
+contra la `DATABASE_URL` de prod (una sola vez).
