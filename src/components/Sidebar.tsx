@@ -1,5 +1,6 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { NavIcon } from './icons.tsx'
+import { signOut, useSession } from '../lib/auth-client.ts'
 
 const SECTIONS = [
   {
@@ -21,7 +22,28 @@ const SECTIONS = [
   },
 ] as const
 
+function initialsOf(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+}
+
 export function Sidebar({ active = 'home' }: { active?: string }) {
+  const { data: session } = useSession()
+  const navigate = useNavigate()
+  const userName = session?.user.name ?? 'Usuario'
+  const userEmail = session?.user.email ?? ''
+  const userInitials = initialsOf(userName)
+
+  async function handleLogout() {
+    await signOut()
+    navigate({ to: '/login' })
+  }
+
   return (
     <aside className="sb">
       <Link to="/" className="sb-brand">
@@ -54,11 +76,23 @@ export function Sidebar({ active = 'home' }: { active?: string }) {
       <div className="sb-spacer" />
 
       <div className="sb-user">
-        <div className="sb-avatar">CR</div>
+        <div className="sb-avatar">{userInitials}</div>
         <div className="sb-user-info">
-          <span className="nm">Camila R.</span>
-          <span className="ml">camila@vertice.mx</span>
+          <span className="nm">{userName}</span>
+          <span className="ml">{userEmail}</span>
         </div>
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión"
+          onClick={handleLogout}
+          style={{ marginLeft: 'auto' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+          </svg>
+        </button>
       </div>
     </aside>
   )

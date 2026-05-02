@@ -4,6 +4,7 @@ const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     ...init,
   })

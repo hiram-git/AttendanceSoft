@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { useTheme } from '../lib/useTheme.ts'
 import { NavIcon } from '../components/icons.tsx'
+import { signIn } from '../lib/auth-client.ts'
 
 export const Route = createFileRoute('/login')({ component: LoginPage })
 
@@ -15,15 +17,26 @@ const credentialsSchema = z.object({
 function LoginPage() {
   const { appDark, toggleApp } = useTheme()
   const navigate = useNavigate()
+  const [authError, setAuthError] = useState<string | null>(null)
 
   const form = useForm({
     defaultValues: {
       email: 'camila@vertice.mx',
-      password: 'passwordfake',
+      password: 'attendancesoft',
       remember: true,
     },
     validators: { onSubmit: credentialsSchema },
-    onSubmit: async () => {
+    onSubmit: async ({ value }) => {
+      setAuthError(null)
+      const res = await signIn.email({
+        email: value.email,
+        password: value.password,
+        rememberMe: value.remember,
+      })
+      if (res.error) {
+        setAuthError(res.error.message ?? 'No pudimos iniciar sesión.')
+        return
+      }
       await navigate({ to: '/dashboard' })
     },
   })
@@ -144,6 +157,22 @@ function LoginPage() {
               </div>
             )}
           </form.Field>
+
+          {authError && (
+            <div
+              role="alert"
+              style={{
+                fontSize: 13,
+                color: 'var(--danger)',
+                background: 'var(--danger-bg)',
+                border: '1px solid color-mix(in oklab, var(--danger) 30%, transparent)',
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-2)',
+              }}
+            >
+              {authError}
+            </div>
+          )}
 
           <form.Subscribe selector={(s) => s.isSubmitting}>
             {(isSubmitting) => (

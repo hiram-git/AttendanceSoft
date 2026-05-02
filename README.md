@@ -7,6 +7,7 @@ Sistema de agendamiento de citas. Implementación del diseño handoff usando el 
 - **Data fetching:** TanStack Query
 - **Forms:** TanStack Form + Zod
 - **API:** Elysia
+- **Auth:** Better-Auth (email + password) con sesiones por cookie
 - **ORM:** Drizzle
 - **DB:** Postgres (vía docker-compose)
 - **Estilos:** CSS con design tokens (variables)
@@ -84,13 +85,27 @@ drizzle.config.ts
 
 ## Endpoints API
 
+Públicos:
+
 - `GET /api/health`
+- `GET /api/auth/*` — manejado por Better-Auth (sign-in, sign-up, sign-out, get-session, etc.)
+- `GET /api/me` — devuelve la sesión actual o `null`
+
+Protegidos (requieren cookie de sesión):
+
 - `GET /api/staff`
 - `GET /api/services`
 - `GET /api/clients`
 - `GET /api/appointments?date=YYYY-MM-DD`
 - `POST /api/appointments`
 - `DELETE /api/appointments/:id`
+
+## Usuario demo
+
+El seed (`bun run db:seed`) crea un usuario para iniciar sesión:
+
+- **Correo:** `camila@vertice.mx`
+- **Contraseña:** `attendancesoft`
 
 ## Pantallas
 

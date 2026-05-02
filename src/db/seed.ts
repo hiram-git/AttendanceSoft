@@ -1,6 +1,20 @@
 import 'dotenv/config'
 import { db } from './index.ts'
-import { staff, services, clients, appointments } from './schema.ts'
+import {
+  staff,
+  services,
+  clients,
+  appointments,
+  user as userTable,
+  session as sessionTable,
+  account as accountTable,
+  verification as verificationTable,
+} from './schema.ts'
+import { auth } from '../server/auth.ts'
+
+const DEMO_EMAIL = 'camila@vertice.mx'
+const DEMO_PASSWORD = 'attendancesoft'
+const DEMO_NAME = 'Camila Reyes'
 
 async function seed() {
   console.log('Seeding database…')
@@ -9,6 +23,16 @@ async function seed() {
   await db.delete(clients)
   await db.delete(services)
   await db.delete(staff)
+  await db.delete(sessionTable)
+  await db.delete(accountTable)
+  await db.delete(verificationTable)
+  await db.delete(userTable)
+
+  // Demo user via Better-Auth (handles password hashing + account row)
+  await auth.api.signUpEmail({
+    body: { email: DEMO_EMAIL, password: DEMO_PASSWORD, name: DEMO_NAME },
+  })
+  console.log(`Demo user: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`)
 
   const insertedStaff = await db
     .insert(staff)
@@ -94,7 +118,9 @@ async function seed() {
     },
   ])
 
-  console.log(`Inserted ${insertedStaff.length} staff, ${insertedServices.length} services, ${insertedClients.length} clients, 4 appointments.`)
+  console.log(
+    `Inserted ${insertedStaff.length} staff, ${insertedServices.length} services, ${insertedClients.length} clients, 4 appointments, 1 demo user.`,
+  )
   process.exit(0)
 }
 
