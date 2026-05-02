@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { cors } from '@elysiajs/cors'
-import { eq } from 'drizzle-orm'
+import { and, eq, gte, lte } from 'drizzle-orm'
 import { db } from '../db/index.ts'
 import { staff, services, clients, appointments } from '../db/schema.ts'
 import { auth } from './auth.ts'
@@ -45,6 +45,17 @@ export const api = new Elysia()
         .get(
           '/api/appointments',
           ({ query }) => {
+            if (query.from && query.to) {
+              return db
+                .select()
+                .from(appointments)
+                .where(
+                  and(
+                    gte(appointments.date, query.from),
+                    lte(appointments.date, query.to),
+                  ),
+                )
+            }
             if (query.date) {
               return db
                 .select()
@@ -53,7 +64,13 @@ export const api = new Elysia()
             }
             return db.select().from(appointments)
           },
-          { query: t.Object({ date: t.Optional(t.String()) }) },
+          {
+            query: t.Object({
+              date: t.Optional(t.String()),
+              from: t.Optional(t.String()),
+              to: t.Optional(t.String()),
+            }),
+          },
         )
         .post(
           '/api/appointments',

@@ -121,7 +121,7 @@ function LoginPage() {
             {(field) => (
               <div className="field">
                 <label className="field-label" htmlFor={field.name}>
-                  Contraseña <a href="#forgot">¿La olvidaste?</a>
+                  Contraseña <Link to="/forgot-password">¿La olvidaste?</Link>
                 </label>
                 <input
                   id={field.name}

@@ -5,9 +5,14 @@ import { NavIcon } from './icons.tsx'
 interface Props {
   here?: string
   crumbPath?: ReadonlyArray<string>
+  onNewAppointment?: () => void
 }
 
-export function Topbar({ here = 'Inicio', crumbPath = ['Operación', 'Inicio'] }: Props) {
+export function Topbar({
+  here = 'Inicio',
+  crumbPath = ['Operación', 'Inicio'],
+  onNewAppointment,
+}: Props) {
   const { appDark, toggleApp } = useTheme()
   return (
     <header className="topbar">
@@ -30,7 +35,9 @@ export function Topbar({ here = 'Inicio', crumbPath = ['Operación', 'Inicio'] }
         {appDark ? NavIcon.sun : NavIcon.moon}
       </button>
       <button className="icon-btn" aria-label="Notificaciones">{NavIcon.bell}</button>
-      <button className="btn-grad">{NavIcon.plus} Nueva cita</button>
+      <button className="btn-grad" onClick={onNewAppointment} disabled={!onNewAppointment}>
+        {NavIcon.plus} Nueva cita
+      </button>
     </header>
   )
 }

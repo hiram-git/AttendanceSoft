@@ -8,10 +8,17 @@ interface Props {
   active?: string
   here?: string
   crumbPath?: ReadonlyArray<string>
+  onNewAppointment?: () => void
   children: ReactNode
 }
 
-export function AppShell({ active, here, crumbPath, children }: Props) {
+export function AppShell({
+  active,
+  here,
+  crumbPath,
+  onNewAppointment,
+  children,
+}: Props) {
   const { appDark } = useTheme()
   return (
     <RequireAuth>
@@ -22,7 +29,11 @@ export function AppShell({ active, here, crumbPath, children }: Props) {
       >
         <Sidebar active={active} />
         <div className="main">
-          <Topbar here={here} crumbPath={crumbPath} />
+          <Topbar
+            here={here}
+            crumbPath={crumbPath}
+            onNewAppointment={onNewAppointment}
+          />
           <div className="content app-scroll">{children}</div>
         </div>
       </div>

@@ -96,7 +96,8 @@ Protegidos (requieren cookie de sesión):
 - `GET /api/staff`
 - `GET /api/services`
 - `GET /api/clients`
-- `GET /api/appointments?date=YYYY-MM-DD`
+- `GET /api/appointments?date=YYYY-MM-DD` — un día
+- `GET /api/appointments?from=YYYY-MM-DD&to=YYYY-MM-DD` — rango (usado por el dashboard)
 - `POST /api/appointments`
 - `DELETE /api/appointments/:id`
 
@@ -106,6 +107,18 @@ El seed (`bun run db:seed`) crea un usuario para iniciar sesión:
 
 - **Correo:** `camila@vertice.mx`
 - **Contraseña:** `attendancesoft`
+
+## Recuperación de contraseña
+
+1. Desde el login, click en "¿La olvidaste?" → `/forgot-password`.
+2. Ingresa el correo. El servidor (Better-Auth) genera un token y, en lugar de
+   enviar correo real, **imprime el enlace de recuperación en la consola del API
+   server** — buscar la sección `────── PASSWORD RESET ──────`.
+3. Copiar el link y pegarlo en el navegador (apunta a `/reset-password?token=...`).
+4. Definir la nueva contraseña → redirige al login.
+
+Para producción, reemplaza el callback `sendResetPassword` en `src/server/auth.ts`
+por uno que envíe el correo real (Resend, Postmark, etc.).
 
 ## Pantallas
 

@@ -16,8 +16,14 @@ export const api = {
   staff: () => http<Array<Staff>>('/api/staff'),
   services: () => http<Array<Service>>('/api/services'),
   clients: () => http<Array<Client>>('/api/clients'),
-  appointments: (date?: string) =>
-    http<Array<Appointment>>(`/api/appointments${date ? `?date=${date}` : ''}`),
+  appointments: (params?: { date?: string; from?: string; to?: string }) => {
+    const qs = new URLSearchParams()
+    if (params?.date) qs.set('date', params.date)
+    if (params?.from) qs.set('from', params.from)
+    if (params?.to) qs.set('to', params.to)
+    const suffix = qs.toString() ? `?${qs.toString()}` : ''
+    return http<Array<Appointment>>(`/api/appointments${suffix}`)
+  },
   createAppointment: (body: Omit<Appointment, 'id' | 'createdAt' | 'status'>) =>
     http<Appointment>('/api/appointments', {
       method: 'POST',
