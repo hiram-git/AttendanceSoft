@@ -229,9 +229,23 @@ function ServicesPage() {
       enableSorting: false,
       cell: ({ row }) => (
         <div className="row-actions">
-          <button className="btn-soft" onClick={() => setEditing(row.original)}>Editar</button>
-          <button className="btn-soft" onClick={() => setDeleting(row.original)} aria-label="Eliminar">
-            ✕
+          <button
+            type="button"
+            className="icon-btn tone-accent"
+            title="Editar servicio"
+            aria-label="Editar servicio"
+            onClick={() => setEditing(row.original)}
+          >
+            {NavIcon.edit}
+          </button>
+          <button
+            type="button"
+            className="icon-btn tone-danger"
+            title="Eliminar servicio"
+            aria-label="Eliminar servicio"
+            onClick={() => setDeleting(row.original)}
+          >
+            {NavIcon.trash}
           </button>
         </div>
       ),

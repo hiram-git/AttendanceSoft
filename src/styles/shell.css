@@ -540,3 +540,41 @@ select.input {
 }
 .auth-fallback-hint { color: var(--app-muted) !important; font-size: 13px !important; }
 .auth-fallback-card .btn-soft { align-self: flex-start; }
+
+/* ───── icon-btn tone variants (row actions) ───── */
+.icon-btn.tone-accent {
+  color: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 30%, var(--app-border));
+}
+.icon-btn.tone-accent:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 50%, var(--app-border));
+}
+.icon-btn.tone-success {
+  color: var(--success);
+  border-color: color-mix(in oklab, var(--success) 30%, var(--app-border));
+}
+.icon-btn.tone-success:hover {
+  background: var(--success-bg);
+  color: var(--success);
+  border-color: color-mix(in oklab, var(--success) 50%, var(--app-border));
+}
+.icon-btn.tone-warning {
+  color: var(--warning);
+  border-color: color-mix(in oklab, var(--warning) 30%, var(--app-border));
+}
+.icon-btn.tone-warning:hover {
+  background: rgba(194,134,44,0.12);
+  color: var(--warning);
+  border-color: color-mix(in oklab, var(--warning) 50%, var(--app-border));
+}
+.icon-btn.tone-danger {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 30%, var(--app-border));
+}
+.icon-btn.tone-danger:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 50%, var(--app-border));
+}

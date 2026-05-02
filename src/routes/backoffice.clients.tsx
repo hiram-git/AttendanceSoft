@@ -222,9 +222,23 @@ function ClientsPage() {
       enableSorting: false,
       cell: ({ row }) => (
         <div className="row-actions">
-          <button className="btn-soft" onClick={() => setEditing(row.original)}>Editar</button>
-          <button className="btn-soft" onClick={() => setDeleting(row.original)} aria-label="Eliminar">
-            ✕
+          <button
+            type="button"
+            className="icon-btn tone-accent"
+            title="Editar cliente"
+            aria-label="Editar cliente"
+            onClick={() => setEditing(row.original)}
+          >
+            {NavIcon.edit}
+          </button>
+          <button
+            type="button"
+            className="icon-btn tone-danger"
+            title="Eliminar cliente"
+            aria-label="Eliminar cliente"
+            onClick={() => setDeleting(row.original)}
+          >
+            {NavIcon.trash}
           </button>
         </div>
       ),

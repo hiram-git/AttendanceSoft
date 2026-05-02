@@ -324,18 +324,34 @@ function AppointmentsPage() {
       enableSorting: false,
       cell: ({ row }) => (
         <div className="row-actions">
-          <button className="btn-soft" onClick={() => setEditing(row.original)}>Editar</button>
+          <button
+            type="button"
+            className="icon-btn tone-accent"
+            title="Editar cita"
+            aria-label="Editar cita"
+            onClick={() => setEditing(row.original)}
+          >
+            {NavIcon.edit}
+          </button>
           {row.original.status !== 'cancelada' && (
             <button
-              className="btn-soft"
+              type="button"
+              className="icon-btn tone-warning"
               title="Marcar como cancelada"
+              aria-label="Marcar como cancelada"
               onClick={() => updateMut.mutate({ id: row.original.id, body: { status: 'cancelada' } })}
             >
-              Cancelar
+              {NavIcon.ban}
             </button>
           )}
-          <button className="btn-soft" onClick={() => setDeleting(row.original)} aria-label="Eliminar">
-            ✕
+          <button
+            type="button"
+            className="icon-btn tone-danger"
+            title="Eliminar cita"
+            aria-label="Eliminar cita"
+            onClick={() => setDeleting(row.original)}
+          >
+            {NavIcon.trash}
           </button>
         </div>
       ),

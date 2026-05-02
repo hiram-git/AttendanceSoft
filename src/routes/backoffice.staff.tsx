@@ -302,12 +302,32 @@ function StaffPage() {
       enableSorting: false,
       cell: ({ row }) => (
         <div className="row-actions">
-          <button className="btn-soft" onClick={() => setAvailabilityFor(row.original)}>
-            Disponibilidad
+          <button
+            type="button"
+            className="icon-btn tone-success"
+            title="Disponibilidad semanal"
+            aria-label="Disponibilidad semanal"
+            onClick={() => setAvailabilityFor(row.original)}
+          >
+            {NavIcon.clock}
           </button>
-          <button className="btn-soft" onClick={() => setEditing(row.original)}>Editar</button>
-          <button className="btn-soft" onClick={() => setDeleting(row.original)} aria-label="Eliminar">
-            ✕
+          <button
+            type="button"
+            className="icon-btn tone-accent"
+            title="Editar persona"
+            aria-label="Editar persona"
+            onClick={() => setEditing(row.original)}
+          >
+            {NavIcon.edit}
+          </button>
+          <button
+            type="button"
+            className="icon-btn tone-danger"
+            title="Eliminar persona"
+            aria-label="Eliminar persona"
+            onClick={() => setDeleting(row.original)}
+          >
+            {NavIcon.trash}
           </button>
         </div>
       ),
