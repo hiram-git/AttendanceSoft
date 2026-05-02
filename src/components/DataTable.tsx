@@ -82,11 +82,18 @@ export function DataTable<T>({
         </thead>
         <tbody>
           {isLoading ? (
-            <tr>
-              <td colSpan={columns.length} className="data-table-empty">
-                Cargando…
-              </td>
-            </tr>
+            Array.from({ length: 5 }).map((_, i) => (
+              <tr key={`skel-${i}`}>
+                {columns.map((_col, j) => (
+                  <td key={j}>
+                    <span
+                      className="skel"
+                      style={{ height: 14, width: j === 0 ? '60%' : '40%' }}
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))
           ) : rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="data-table-empty">

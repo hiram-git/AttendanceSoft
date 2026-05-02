@@ -456,3 +456,21 @@ select.input {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* ───── Skeleton ───── */
+.skel {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--app-surface-2) 0%,
+    color-mix(in oklab, var(--app-border) 70%, var(--app-surface-2)) 50%,
+    var(--app-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes skel-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}

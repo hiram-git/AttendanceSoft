@@ -94,11 +94,16 @@ Públicos:
 Protegidos (requieren cookie de sesión). Cada recurso tiene CRUD completo:
 
 - `GET|POST /api/staff` y `PATCH|DELETE /api/staff/:id`
+- `GET|PUT /api/staff/:id/availability` — disponibilidad semanal
+  (PUT reemplaza la semana completa atómicamente)
 - `GET|POST /api/services` y `PATCH|DELETE /api/services/:id`
 - `GET|POST /api/clients` y `PATCH|DELETE /api/clients/:id`
 - `GET /api/appointments` (`?date=` un día, `?from=&to=` rango)
-- `POST /api/appointments`
-- `PATCH|DELETE /api/appointments/:id`
+- `POST /api/appointments` — devuelve **409** si la cita choca con
+  otra del mismo personal o sala (mensaje + lista de conflictos)
+- `PATCH /api/appointments/:id` — misma validación; se omite cuando se
+  marca `status='cancelada'`
+- `DELETE /api/appointments/:id`
 
 ## Usuario demo
 
@@ -133,6 +138,7 @@ Protegidas (requieren sesión):
 - `/backoffice/appointments` — agenda completa con filtros (rango, tipo, estado), edit y delete.
 - `/backoffice/clients` — clientes (CRUD).
 - `/backoffice/services` — servicios (CRUD, filtro por tipo).
-- `/backoffice/staff` — personal (CRUD, picker de avatar gradient, salas separadas por coma).
+- `/backoffice/staff` — personal (CRUD, picker de avatar gradient, salas separadas por coma, editor de **disponibilidad semanal** por persona).
 - `/backoffice/reports` — resumen del mes: totales, breakdown por tipo y carga por persona.
 - `/backoffice/settings` — placeholder.
+- `/profile` — datos de la cuenta (nombre) y cambio de contraseña.
