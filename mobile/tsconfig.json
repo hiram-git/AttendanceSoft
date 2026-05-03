@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["src", "vite.config.ts", "capacitor.config.ts"],
+  "exclude": ["dist", "ios", "android", "node_modules"],
+  "compilerOptions": {
+    "paths": {
+      "#/*": ["../src/*"],
+      "@/*": ["../src/*"]
+    }
+  }
+}

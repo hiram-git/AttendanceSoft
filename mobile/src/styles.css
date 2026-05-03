@@ -1,0 +1,20 @@
+/* Mobile bundle reuses every shared design token + module from the
+   web. No Tailwind here — the portal styles are written against
+   plain CSS variables and don't need it. */
+
+@import '../../src/styles/tokens.css';
+@import '../../src/styles/login.css';
+@import '../../src/styles/shell.css';
+@import '../../src/styles/portal.css';
+
+/* Mobile-only tweaks: clamp the portal main column on small screens
+   and disable user-select on the chrome to feel native. */
+.portal-nav,
+.portal-brand,
+.portal-nav-link,
+.portal-user,
+.book-step,
+.book-stepper {
+  user-select: none;
+  -webkit-user-select: none;
+}

@@ -2,6 +2,7 @@
   "name": "attendancesoft",
   "private": true,
   "type": "module",
+  "workspaces": ["mobile"],
   "imports": {
     "#/*": "./src/*"
   },
@@ -21,6 +22,9 @@
     "db:seed": "bun run src/db/seed.ts",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
+    "mobile:dev": "bun --cwd mobile run dev",
+    "mobile:build": "bun --cwd mobile run build",
+    "mobile:sync": "bun --cwd mobile run sync",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
     "check": "prettier --check ."
