@@ -7,7 +7,10 @@ import { ToastProvider } from '../../src/lib/ToastProvider'
 import { loadSessionToken } from '../../src/lib/sessionToken'
 import { api } from '../../src/lib/api'
 import {
+  applyStatusBarTheme,
+  hideSplash,
   isNative,
+  registerDeepLinks,
   registerDeviceForPush,
   scheduleAppointmentReminder,
 } from './lib/native'
@@ -59,9 +62,14 @@ async function bootstrap() {
     </StrictMode>,
   )
 
-  // Push registration is best-effort and runs after first paint so it
-  // doesn't slow down the cold start. Only fires on real device/sim.
+  // Best-effort native side effects after first paint. None of these
+  // block the app boot — the user can interact while they finish.
   if (isNative()) {
+    void hideSplash()
+    void applyStatusBarTheme(false) // light theme by default
+    void registerDeepLinks((path) => {
+      router.navigate({ to: path })
+    })
     setTimeout(() => {
       void registerDeviceForPush(api.portalRegisterDevice)
     }, 0)

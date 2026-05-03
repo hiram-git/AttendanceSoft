@@ -78,10 +78,58 @@ bun --cwd mobile run android:open
 | Dispositivo físico (LAN) | `http://192.168.x.y:3001` |
 | Producción | `https://api.attendancesoft.com` |
 
-## Pendientes para sub-fases siguientes
+## Iconos y splash
 
-- **6.2** auth/cookies cross-origin con `capacitor://localhost` y
-  `https://localhost`. Better-Auth `trustedOrigins` y CORS del API.
-- **6.3** push notifications + local notifications + add-to-calendar.
-- **6.4** iconos, splash, App ID definitivo, deep links.
-- **6.5** pipeline de build (TestFlight + Play Internal).
+Los placeholders viven en `mobile/resources/icon.svg` y
+`mobile/resources/splash.svg`. Para regenerar todos los tamaños
+nativos:
+
+```bash
+# Reemplaza los SVG (o agrega icon.png 1024×1024 / splash.png 2732×2732)
+bun --cwd mobile run assets
+```
+
+`@capacitor/assets` escribe los PNG por plataforma dentro de
+`mobile/ios/App/...` y `mobile/android/app/src/main/...`. Después corre
+`cap sync` para que el proyecto nativo recoja los cambios.
+
+## Deep links
+
+La app responde al esquema personalizado `attendancesoft://`. Útil para
+las invitaciones del backoffice:
+
+```
+attendancesoft://invite/<token>   →   /portal/invite/<token>
+```
+
+Para probar en simulador iOS:
+
+```bash
+xcrun simctl openurl booted "attendancesoft://invite/abc123"
+```
+
+En Android emulator:
+
+```bash
+adb shell am start -W -a android.intent.action.VIEW -d "attendancesoft://invite/abc123" mx.attendancesoft.app
+```
+
+Universal links (HTTPS) quedan para cuando haya dominio confirmado.
+
+## Notificaciones
+
+- **Local**: cada vez que un cliente reserva, la app programa una
+  notificación 1h antes de la cita. Funciona offline. La permission
+  prompt aparece la primera vez.
+- **Push**: la app registra el token APN/FCM contra
+  `POST /api/portal/devices` en cada cold start. El envío real
+  (Firebase Admin / APN keys) queda como follow-up — primero hay que
+  configurar el proyecto de Firebase y subir las APN keys a Capacitor.
+
+## Pendientes
+
+- Sending side de push notifications (FCM + APN credenciales).
+- Add-to-calendar nativo.
+- Biometric login opt-in.
+- Universal / App Links contra el dominio definitivo.
+- Pipeline de build (TestFlight + Play Internal).

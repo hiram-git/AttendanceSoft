@@ -113,6 +113,65 @@ function normalizeTime(t: string) {
   return t.length === 5 ? t : t.slice(0, 5)
 }
 
+/**
+ * Hide the splash screen once the app has bootstrapped. Called from
+ * the very last step of mobile/src/main.tsx so the user sees the
+ * brand artwork until the router is mounted.
+ */
+export async function hideSplash() {
+  if (!isNative()) return
+  const { SplashScreen } = await import('@capacitor/splash-screen')
+  await SplashScreen.hide({ fadeOutDuration: 200 })
+}
+
+/**
+ * Apply the OS status bar style based on the current theme. Default to
+ * dark content on light theme and vice versa.
+ */
+export async function applyStatusBarTheme(dark: boolean) {
+  if (!isNative()) return
+  const { StatusBar, Style } = await import('@capacitor/status-bar')
+  await StatusBar.setStyle({ style: dark ? Style.Light : Style.Dark })
+  if (platform() === 'android') {
+    await StatusBar.setBackgroundColor({ color: dark ? '#0b1220' : '#ffffff' })
+  }
+}
+
+/**
+ * Listen for deep-link opens. The configured URL scheme is
+ * `attendancesoft://`; tapping `attendancesoft://invite/<token>` from
+ * an external app routes the user to /portal/invite/<token>.
+ *
+ * Returns an unsubscribe function (mostly for tests / hot-reload).
+ */
+export async function registerDeepLinks(navigateTo: (path: string) => void) {
+  if (!isNative()) return () => {}
+  const { App } = await import('@capacitor/app')
+
+  const handler = (data: { url: string }) => {
+    try {
+      const parsed = new URL(data.url)
+      // Strip the scheme/host and route by pathname.
+      // Example URL: attendancesoft://invite/abc123 → path "/invite/abc123"
+      // We map invite/<token> → /portal/invite/<token>.
+      const segments = [parsed.host, ...parsed.pathname.split('/').filter(Boolean)]
+      if (segments[0] === 'invite' && segments[1]) {
+        navigateTo(`/portal/invite/${segments[1]}`)
+        return
+      }
+      // Fallback: route directly.
+      navigateTo(parsed.pathname || '/portal')
+    } catch {
+      // Malformed deep link → ignore.
+    }
+  }
+
+  const sub = await App.addListener('appUrlOpen', handler)
+  return () => {
+    void sub.remove()
+  }
+}
+
 function stableNumericId(uuid: string): number {
   let h = 0
   for (let i = 0; i < uuid.length; i++) {
