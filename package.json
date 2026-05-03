@@ -30,6 +30,9 @@
     "check": "prettier --check ."
   },
   "dependencies": {
+    "@capacitor/local-notifications": "^8.0.2",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/push-notifications": "^8.0.3",
     "@elysiajs/cors": "^1.4.2",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",

@@ -10,6 +10,7 @@ import {
   clientInvitations,
   appointments,
   user,
+  deviceTokens,
 } from '../db/schema.ts'
 import { randomBytes } from 'node:crypto'
 import { auth, NATIVE_ORIGINS } from './auth.ts'
@@ -371,6 +372,51 @@ export const api = new Elysia()
               .where(eq(appointments.id, params.id))
               .returning()
             return row
+          },
+        )
+
+        // Mobile clients call this on every cold start to register
+        // (or refresh) the device push token. Same (userId, platform,
+        // token) is upserted; lastSeenAt is bumped so we can prune
+        // stale tokens later. The actual send-side (FCM/APNs) gets
+        // wired when the credentials are available.
+        .post(
+          '/api/portal/devices',
+          async ({ body, session }) => {
+            const userId = session!.user.id
+            const existing = await db
+              .select()
+              .from(deviceTokens)
+              .where(
+                and(
+                  eq(deviceTokens.userId, userId),
+                  eq(deviceTokens.platform, body.platform),
+                  eq(deviceTokens.token, body.token),
+                ),
+              )
+            if (existing.length > 0) {
+              await db
+                .update(deviceTokens)
+                .set({ lastSeenAt: new Date() })
+                .where(eq(deviceTokens.id, existing[0].id))
+              return { ok: true, refreshed: true }
+            }
+            await db.insert(deviceTokens).values({
+              userId,
+              platform: body.platform,
+              token: body.token,
+            })
+            return { ok: true, refreshed: false }
+          },
+          {
+            body: t.Object({
+              platform: t.Union([
+                t.Literal('ios'),
+                t.Literal('android'),
+                t.Literal('web'),
+              ]),
+              token: t.String({ minLength: 4 }),
+            }),
           },
         )
 

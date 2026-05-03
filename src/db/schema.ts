@@ -155,6 +155,24 @@ export const appointments = pgTable('appointments', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
+/**
+ * Per-user device push tokens. One row per (userId, platform, token);
+ * upsert from the mobile client on boot. Used by the server to fan out
+ * notifications via FCM/APNs (sending side wired in a follow-up).
+ */
+export const devicePlatformEnum = pgEnum('device_platform', ['ios', 'android', 'web'])
+
+export const deviceTokens = pgTable('device_tokens', {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  platform: devicePlatformEnum().notNull(),
+  token: text().notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  lastSeenAt: timestamp('last_seen_at').notNull().defaultNow(),
+})
+
 export type Staff = typeof staff.$inferSelect
 export type StaffAvailability = typeof staffAvailability.$inferSelect
 export type Service = typeof services.$inferSelect
@@ -163,4 +181,6 @@ export type ClientInvitation = typeof clientInvitations.$inferSelect
 export type Appointment = typeof appointments.$inferSelect
 export type User = typeof user.$inferSelect
 export type Session = typeof session.$inferSelect
+export type DeviceToken = typeof deviceTokens.$inferSelect
 export type UserRole = (typeof userRoleEnum.enumValues)[number]
+export type DevicePlatform = (typeof devicePlatformEnum.enumValues)[number]

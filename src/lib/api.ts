@@ -153,6 +153,8 @@ export const api = {
     http<Appointment>('/api/portal/appointments', json('POST', b)),
   portalCancel: (id: string) =>
     http<Appointment>(`/api/portal/appointments/${id}/cancel`, { method: 'PATCH' }),
+  portalRegisterDevice: (b: { platform: 'ios' | 'android' | 'web'; token: string }) =>
+    http<{ ok: true; refreshed: boolean }>('/api/portal/devices', json('POST', b)),
 
   // Invitations (staff side)
   createClientInvitation: (clientId: string) =>

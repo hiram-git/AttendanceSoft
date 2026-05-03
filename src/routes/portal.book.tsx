@@ -67,9 +67,12 @@ function BookPage() {
         date,
         startTime: startTime!,
       }),
-    onSuccess: () => {
+    onSuccess: (booking) => {
       qc.invalidateQueries({ queryKey: ['portal', 'appointments'] })
       toast.success('Cita reservada', `${date} · ${startTime}`)
+      // Best-effort local reminder. The helper is mobile-only and
+      // dynamically imported so it disappears from the web bundle.
+      void scheduleReminderIfMobile(booking)
       navigate({ to: '/portal' })
     },
     onError: (e) => {
@@ -365,4 +368,34 @@ function kindBadge(k: Service['kind']) {
     : k === 'procedimiento'
     ? 'warning'
     : 'danger'
+}
+
+// Side effect for the mobile bundle: schedule a local notification 1h
+// before the appointment. The mobile entry registers the implementation
+// on window at boot — see mobile/src/main.tsx. On the web bundle the
+// hook is never set, so this is a no-op.
+type ReminderHook = (b: {
+  id: string
+  date: string
+  startTime: string
+  label: string
+}) => Promise<void> | void
+
+declare global {
+  interface Window {
+    __attsoft_schedule_reminder?: ReminderHook
+  }
+}
+
+async function scheduleReminderIfMobile(booking: {
+  id: string
+  date: string
+  startTime: string
+  label: string
+}) {
+  try {
+    await window.__attsoft_schedule_reminder?.(booking)
+  } catch (err) {
+    console.warn('[notifications] schedule failed:', err)
+  }
 }
