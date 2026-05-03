@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useTheme } from '../lib/useTheme.ts'
 import { NavIcon } from '../components/icons.tsx'
 import { signIn } from '../lib/auth-client.ts'
+import { setSessionToken } from '../lib/sessionToken.ts'
 
 export const Route = createFileRoute('/login')({ component: LoginPage })
 
@@ -37,6 +38,10 @@ function LoginPage() {
         setAuthError(res.error.message ?? 'No pudimos iniciar sesión.')
         return
       }
+      // Persist the token for the bearer-auth path used by the
+      // mobile bundle. On the web bundle it's redundant (cookie is
+      // already set) but harmless.
+      setSessionToken((res.data as { token?: string }).token)
       const role = (res.data.user as { role?: string }).role
       await navigate({ to: role === 'client' ? '/portal' : '/dashboard' })
     },

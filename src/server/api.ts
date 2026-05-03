@@ -12,7 +12,7 @@ import {
   user,
 } from '../db/schema.ts'
 import { randomBytes } from 'node:crypto'
-import { auth } from './auth.ts'
+import { auth, NATIVE_ORIGINS } from './auth.ts'
 import { describeConflicts, findConflicts } from './conflicts.ts'
 
 // Forward all /api/auth/* requests to Better-Auth's fetch handler.
@@ -66,7 +66,9 @@ function fromMinutes(m: number) {
 export const api = new Elysia()
   .use(
     cors({
-      origin: [webOrigin],
+      // Web origin (cookie auth) plus the Capacitor webview origins
+      // (bearer auth from the mobile bundle).
+      origin: [webOrigin, ...NATIVE_ORIGINS],
       credentials: true,
     }),
   )

@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { bearer } from 'better-auth/plugins'
 import { db } from '../db/index.ts'
 import * as schema from '../db/schema.ts'
 
@@ -13,6 +14,17 @@ const webURL = process.env.WEB_URL ?? 'http://localhost:3000'
 
 const isProd = process.env.NODE_ENV === 'production'
 
+// Native webviews have non-http origins. Better-Auth and CORS need to
+// accept them so the mobile bundle can talk to the API.
+//   capacitor://localhost  → iOS WKWebView
+//   https://localhost      → Android WebView
+//   http://localhost       → Capacitor live-reload mode
+export const NATIVE_ORIGINS = [
+  'capacitor://localhost',
+  'https://localhost',
+  'http://localhost',
+]
+
 export const auth = betterAuth({
   baseURL: apiURL,
   basePath: '/api/auth',
@@ -20,7 +32,7 @@ export const auth = betterAuth({
     process.env.AUTH_SECRET ??
     process.env.BETTER_AUTH_SECRET ??
     'dev-secret-change-me',
-  trustedOrigins: [webURL, apiURL],
+  trustedOrigins: [webURL, apiURL, ...NATIVE_ORIGINS],
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
@@ -30,6 +42,12 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
+  // bearer() lets a client present `Authorization: Bearer <token>`
+  // instead of relying on the session cookie. The mobile app stores
+  // the token returned by sign-in/sign-up and sends it on every
+  // request, sidestepping the cross-origin cookie problem inside
+  // capacitor:// / https://localhost webviews.
+  plugins: [bearer()],
   user: {
     additionalFields: {
       role: {

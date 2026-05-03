@@ -6,6 +6,7 @@ import type {
   Appointment,
   User,
 } from '../db/schema.ts'
+import { getSessionToken } from './sessionToken.ts'
 
 const BASE =
   import.meta.env.PUBLIC_API_URL ??
@@ -23,10 +24,21 @@ export class ApiError extends Error {
 }
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  // Same fallback strategy as auth-client.ts: cookies on the web,
+  // bearer header in the Capacitor webview where they're stored.
+  const token = getSessionToken()
+  if (token) headers.Authorization = `Bearer ${token}`
+
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
     ...init,
+    headers: {
+      ...headers,
+      ...(init?.headers as Record<string, string> | undefined),
+    },
   })
   if (!res.ok) {
     let body: unknown = null

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { NavIcon } from './icons.tsx'
 import { signOut, useSession } from '../lib/auth-client.ts'
+import { clearSessionToken } from '../lib/sessionToken.ts'
 
 const SECTIONS = [
   {
@@ -42,6 +43,7 @@ export function Sidebar({ active = 'home' }: { active?: string }) {
 
   async function handleLogout() {
     await signOut()
+    clearSessionToken()
     navigate({ to: '/login' })
   }
 

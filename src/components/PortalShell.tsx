@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { RequireAuth } from './RequireAuth.tsx'
 import { NavIcon } from './icons.tsx'
 import { signOut, useSession } from '../lib/auth-client.ts'
+import { clearSessionToken } from '../lib/sessionToken.ts'
 import { useTheme } from '../lib/useTheme.ts'
 
 const NAV: Array<{ id: string; label: string; to: string }> = [
@@ -35,6 +36,7 @@ export function PortalShell({ active = 'home', children }: Props) {
 
   async function handleLogout() {
     await signOut()
+    clearSessionToken()
     navigate({ to: '/login' })
   }
 

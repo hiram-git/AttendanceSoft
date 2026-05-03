@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useTheme } from '../lib/useTheme.ts'
 import { NavIcon } from '../components/icons.tsx'
 import { api, ApiError } from '../lib/api.ts'
+import { setSessionToken } from '../lib/sessionToken.ts'
 
 export const Route = createFileRoute('/portal/signup')({ component: PortalSignupPage })
 
@@ -26,12 +27,13 @@ function PortalSignupPage() {
     onSubmit: async ({ value }) => {
       setError(null)
       try {
-        await api.portalSignup({
+        const res = await api.portalSignup({
           name: value.name,
           email: value.email,
           password: value.password,
           phone: value.phone || undefined,
         })
+        setSessionToken(res.token)
         navigate({ to: '/portal' })
       } catch (e) {
         setError(e instanceof ApiError ? e.message : 'No pudimos crear tu cuenta')
