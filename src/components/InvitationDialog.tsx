@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Modal } from './Modal.tsx'
 import { api, ApiError } from '../lib/api.ts'
@@ -31,18 +31,26 @@ export function InvitationDialog({ client, open, onOpenChange }: Props) {
     },
   })
 
-  // Reset state and request a fresh token when the dialog opens for a
-  // (different) client. Intentionally omits createMut from the deps —
-  // including it would create a new invitation on every render.
-  const clientId = client?.id
+  // Auto-request an invitation the first time this dialog opens for a
+  // given client. The ref guard is what actually breaks the loop:
+  // `createMut` is recreated on every render, so even if the effect
+  // re-fires, we only call mutate when the (open, clientId) tuple
+  // changes — never on a re-render caused by the mutation's own
+  // setState (which would generate infinite tokens otherwise).
+  const requestedFor = useRef<string | null>(null)
+  const clientId = client?.id ?? null
   useEffect(() => {
-    if (open && clientId) {
-      setUrl(null)
-      setExpiresAt(null)
-      setError(null)
-      setCopied(false)
-      createMut.mutate(clientId)
+    if (!open) {
+      requestedFor.current = null
+      return
     }
+    if (!clientId || requestedFor.current === clientId) return
+    requestedFor.current = clientId
+    setUrl(null)
+    setExpiresAt(null)
+    setError(null)
+    setCopied(false)
+    createMut.mutate(clientId)
   }, [open, clientId, createMut])
 
   async function handleCopy() {
